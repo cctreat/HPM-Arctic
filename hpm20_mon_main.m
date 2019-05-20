@@ -195,8 +195,12 @@ ann_ALD2_max = zeros(sim_len_yr ,1);  % GIPL model annual max active layer depth
 ann_ALD3_max = zeros(sim_len_yr ,1);  % GIPL model annual max active layer depth to Tfr - FIT
 ann_ALD_max = zeros(sim_len_yr ,1);  % selected one of above three to use
 soil_node_temp_month_save = zeros(sim_len_yr ,12,params_gipl.NumberOfSoilComputationNodes);
+soil_node_temp_month_saveMAT = zeros(sim_len_yr*12,params_gipl.NumberOfSoilComputationNodes);
 ann_snow_depth = zeros(sim_len_yr ,1);  % GIPL model max annual snowdepth (meters?) %CT not actuually used.
-ann_ALD = zeros(sim_len_yr ,1);  % annual active layer max depth (Kudryavtsev)
+% ann_ALD = zeros(sim_len_yr ,1);  % annual active layer max depth (Kudryavtsev)
+ann_layer_Tmax = zeros(params_gipl.ndepth-1 ,2);   % stores annual max T of each soil layer for permmafrost of current year and previous year
+tf_permafrost_layer_to10meters = zeros(params_gipl.ndepth-1,sim_len_yr);
+zero_vec_SoilNodes = zeros(1,params_gipl.NumberOfSoilComputationNodes);
 
 % vectors and arrays for the math
 
@@ -261,6 +265,10 @@ years_forcing = TA(:,1);
 months_forcing = TA(:,2);
 mon_precip_forcing = TA(:,3);
 mon_temp_forcing = TA(:,4);
+
+% crudely adjust forcing temperature from Seida (-6.87C) to 'Stordalen (about -1C)
+% **** delta-T ****
+mon_temp_forcing = mon_temp_forcing + 4;
 
 %  NOTE: climate forcing timespan should match inputs in parameter file, or should overwrite them
 %  NOTE: climate forcing file should be chronological, so first line would have oldest driver (and largest year BP)
@@ -386,7 +394,7 @@ growing_season_wtd(1) = params.wtd_0;
 % Set initial soil temperatures
 T_profile_prev = params_gipl.T_init_gipl;
 % ??? (next line)  ?? add permafrost flag to parameters??
-ann_ALD(1) = params.ald_0;  % arbitrary first year ALD (m)
+ann_ALD_max(1) = params.ald_0;  % arbitrary first year ALD (m)
 
 % calculate layer density, thickness, and depth
 
@@ -445,6 +453,7 @@ for iyear = 2:sim_len_yr
     if (flag1 < 0.5)
         ann_WTD(iyear) = params.wtd_0;
         growing_season_wtd(iyear) = params.wtd_0;
+%         mon_wtd_prev = params.wtd_0;
 
         Zstar = params.wfps_c1 * onevec + (params.wfps_c2 - params.wfps_c1)*((dens - params.min_bulk_dens)...
                      ./(dens - params.min_bulk_dens + params.wfps_c3));
@@ -510,18 +519,46 @@ for iyear = 2:sim_len_yr
             hpm20_mon_gipl2(iyear, imonth, num_days_in_month, T_profile_prev, daily_air_temp_for_month, ...
                     snowDepth, ALFA, depth, thick, wfps, porosity, dens, params, params_gipl);
         
-        T_profile_prev = soilTemp;   % value at end of month %original;
-        layer_frozen = -((soil_layer_temp_month > 0) - 1);  % =0 if unfrozen, =1 otherwise (for transmissivity and infiltration and AET?)
-        soil_node_temp_month_save(iyear ,imonth,:) = soil_node_temp_month;
+          layer_frozen = -((soil_layer_temp_month > 0) - 1);  % =0 if unfrozen, =1 otherwise (for transmissivity and infiltration and AET?)
+        if (imonth == 1) 
+            ann_layer_Tmax(:,2) = ann_layer_Tmax(:,1);
+            ann_layer_Tmax(:,1) = soil_layer_temp_month;
+        else
+            ann_layer_Tmax(:,1) = max(ann_layer_Tmax(:,1), soil_layer_temp_month');
+        end 
+        
+        if (imonth == 12)
+            tf_permafrost_layer_to10meters(:,iyear) = (ann_layer_Tmax(:,1) < (params_gipl.Tfr + 0*params_gipl.FIT)) .* ...
+                (ann_layer_Tmax(:,1) < (params_gipl.Tfr + 0*params_gipl.FIT));
+        end
+        
+% trying to add some heat to the unfrozen layers
+%    heat is added by increasing node temps by 'MoHeatIn' (°C) each month
+%    (only to unfrozen layers within depth range of ???
 
-%         trying to add some heat to the unfrozen layers
-%         layer_frozen = -((soil_layer_temp_month > 0) - 1);  % =0 if unfrozen, =1 otherwise (for transmissivity and infiltration and AET?)
-%         node_thawed = (soil_node_temp_month > 0);  % =0 if frozen, =1 otherwise (for transmissivity and infiltration and AET?)   
-%         node_peat = (ann_Z_total(iyear -1) >= soilLayerDepth);
-%         soilTemp    = soilTemp + 0.5 * node_thawed .* node_peat;   % value at end of month; need to modify so it only dumps into peat.
-%         T_profile_prev = soilTemp;
-%         soil_node_temp_month_save(iyear ,imonth,:) = soil_node_temp_month;
+          node_thawed = soil_node_temp_month > 0;  % =0 if frozen, =1 otherwise (for transmissivity and infiltration and AET?)   
+          node_HeatIn =(params_gipl.soilNodeDepth <= ann_Z_total(iyear-1)); % add it to the peat only
 
+          if (params.HeatFlux_DeltaT > 0)
+              soilTemp    = soilTemp +  MoHeatIn_C* node_HeatIn .* node_thawed ;   % value at end of month; need to modified so it only dumps into peat.
+          else
+              for inode = 1:(params_gipl.ndepth-1)
+                  if (soilTemp(inode) > 0)
+                      if (node_HeatIn(inode) * node_thawed(inode) > 0)
+                          soilTemp(inode) = max(0.1, soilTemp(inode) + params.HeatFlux_DeltaT);
+                      end
+                  end
+              end
+          end
+          
+          MoHeatIn_C = params.HeatFlux_DeltaT * (iyear >= params.HeatFlux_StartYear) * (iyear <= params.HeatFlux_EndYear);
+          
+          soilTemp    = soilTemp +  MoHeatIn_C* node_HeatIn .* node_thawed ;   % value at end of month; need to modified so it only dumps into peat.
+%  
+          T_profile_prev = soilTemp;
+          soil_node_temp_month_save(iyear ,imonth,:) = soil_node_temp_month;
+          soil_node_temp_month_saveMAT(sim_month,:) = soil_node_temp_month;
+          
 % COMPUTE MONTHLY ALD  (invoke this only with permafrost, or use for seasonal frost layer as well?)
 %   (invoke this only with permafrost during thaw season?). Montly ALD is used in water
 %   balance, annual ALD is used for NPP.
@@ -531,19 +568,18 @@ for iyear = 2:sim_len_yr
 %            if (imonth > 3 && imonth < 11)  % potential thaw months only
 
 %                [ALD1, ALD2, ALD3] = hpm20_mon_activelayer1(soil_node_temp_month, soil_layer_temp_month, params_gipl);
-               [ALD1, ALD2, ALD3] = hpm20_mon_activelayer2(soil_node_temp_month_save((iyear-2):iyear, :, 1:63), params_gipl);
+               [ALD1, ALD2, ALD3] = hpm20_mon_activelayer2(soil_node_temp_month_saveMAT((sim_month -23):sim_month, 1:63), params_gipl);
                 
-%                 if ( abs(ALD1 - mon_ALD(sim
-
-                ann_ALD1_max(iyear) = min(ALD1, ann_ALD1_max(iyear));
-                ann_ALD2_max(iyear) = min(ALD2, ann_ALD2_max(iyear));
-                ann_ALD3_max(iyear) = min(ALD3, ann_ALD3_max(iyear));
-
 %  which is best ALD metric, 1 or 2 or 3?
                 mon_ALD1(sim_month) = ALD1;
                 mon_ALD2(sim_month) = ALD2;
                 mon_ALD3(sim_month) = ALD3;
                 mon_ALD(sim_month) = min([ALD1, ALD2, ALD3]); %CT changed from mean
+                
+                ann_ALD1_max(iyear) = max(ALD1, ann_ALD1_max(iyear));
+                ann_ALD2_max(iyear) = max(ALD2, ann_ALD2_max(iyear));
+                ann_ALD3_max(iyear) = max(ALD3, ann_ALD3_max(iyear));
+
                 ann_ALD_max(iyear) = max(mon_ALD(sim_month), ann_ALD_max(iyear));
            else
                mon_ALD(sim_month) = params.ald_0;
@@ -779,7 +815,7 @@ for iyear = 2:sim_len_yr
 
 % determine root inputs
         
-    rootin = hpm20_mon_rootin(depth, thick, params, NPP, growing_season_wtd(iyear), ann_ALD(iyear), ...?  
+    rootin = hpm20_mon_rootin(depth, thick, params, NPP, growing_season_wtd(iyear), ann_ALD_max(iyear), ...?  
         ann_Z_total(iyear-1), onevec);
 
 % for debugging?? compare these two root input values
@@ -1019,7 +1055,7 @@ fprintf(fid4,'c-14 input file name %128s   \n',params.c14_in_name);
 fprintf(fid4,'site name            %28s   \n',params.site_name);
 fprintf(fid4,'simulation name      %58s   \n\n',params.sim_name);
 
-fprintf(fid4,'site latitude              %g   \n',params.site_name);
+fprintf(fid4,'site latitude              %g   \n',params.latitude);
 fprintf(fid4,'simulation length [y]      %g   \n',params.sim_len);
 fprintf(fid4,'simulation start [yr BP]   %g   \n',params.sim_start);
 fprintf(fid4,'simulation end [yr BP]     %g   \n',params.sim_end);
@@ -1037,6 +1073,9 @@ fprintf(fid4,'14C decay [e-folding y]    %6.2f \n\n',params.tau_c14);
 fprintf(fid4,'ann_temp [C]               %6.2f \n',params.ann_temp);
 fprintf(fid4,'ann_ppt [m/y]              %6.2f \n',params.ann_ppt);
 fprintf(fid4,'ET_0    [m/y]              %6.2f \n\n',params.ann_ET_0);
+fprintf(fid4,'HeatFlux_DeltaT [C]        %6.2f \n\n',params.HeatFlux_DeltaT);
+fprintf(fid4,'HeatFlux_StartYear[SimYr]  %6.0f \n\n',params.HeatFlux_StartYear);
+fprintf(fid4,'HeatFlux_EndYear [SimYr]   %6.0f \n\n',params.HeatFlux_EndYear);
 
 fprintf(fid4,'Roff_c1                    %6.2f \n',params.Roff_c1);
 fprintf(fid4,'Roff_c2                    %6.2f \n',params.Roff_c2);
