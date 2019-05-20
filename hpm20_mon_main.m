@@ -538,6 +538,7 @@ for iyear = 2:sim_len_yr
 
           node_thawed = soil_node_temp_month > 0;  % =0 if frozen, =1 otherwise (for transmissivity and infiltration and AET?)   
           node_HeatIn =(params_gipl.soilNodeDepth <= ann_Z_total(iyear-1)); % add it to the peat only
+          MoHeatIn_C = params.HeatFlux_DeltaT * (iyear >= params.HeatFlux_StartYear) * (iyear <= params.HeatFlux_EndYear);
 
           if (params.HeatFlux_DeltaT > 0)
               soilTemp    = soilTemp +  MoHeatIn_C* node_HeatIn .* node_thawed ;   % value at end of month; need to modified so it only dumps into peat.
@@ -551,7 +552,6 @@ for iyear = 2:sim_len_yr
               end
           end
           
-          MoHeatIn_C = params.HeatFlux_DeltaT * (iyear >= params.HeatFlux_StartYear) * (iyear <= params.HeatFlux_EndYear);
           
           soilTemp    = soilTemp +  MoHeatIn_C* node_HeatIn .* node_thawed ;   % value at end of month; need to modified so it only dumps into peat.
 %  

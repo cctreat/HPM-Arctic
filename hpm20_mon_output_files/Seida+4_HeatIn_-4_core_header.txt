@@ -1,0 +1,2 @@
+HPM20_mon output - core of final state - units: depth & thickness: m, mass: kg/m2 or kg/m3, time: y; decomp: 1/y; WFPS: m3/m3 
+ cohort_age coh_depth coh_mass coh_m_0 coh_k_mean coh_bulk_dens  m_each_PFT_for_5_PFTs  del_c14_M 

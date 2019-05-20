@@ -917,13 +917,13 @@ legend('orientation','Horizontal','Location','South')
 
 layers_of_int = [1, 5, 11, 21, 41];
 subplot(4,1,2)
-plot(soil_node_temp_month_save(1:(100*12),layers_of_int))
+plot(soil_node_temp_month_saveMAT(1:(100*12),layers_of_int))
 title('\fontsize{10}Soil Temps, first 100 years of simulation');
 legend('\fontsize{10}0 cm','\fontsize{10}20 cm', '\fontsize{10}50 cm',...
     '\fontsize{10}100 cm', '\fontsize{10}300 cm')
 legend('orientation','Horizontal','Location','South')
 subplot(4,1,3)
-plot(soil_node_temp_month_save((sim_start+55):(sim_start+65),:,layers_of_int)); hold on
+plot(soil_node_temp_month_saveMAT((sim_start+55)*12:(sim_start+65)*12,layers_of_int)); hold on
 plot(mon_snowdepth(((sim_start+55)*12):((sim_start+65)*12))*100); 
 plot(-mon_wtd(((sim_start+55)*12):((sim_start+65)*12))*100); hold off
 title('\fontsize{10}Monthly soil temps, 2005-2015');

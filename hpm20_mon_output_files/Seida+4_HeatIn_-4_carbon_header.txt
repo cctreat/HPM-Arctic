@@ -1,0 +1,2 @@
+HPM20_mon output - time series of carbon dynamics - units: depth/thickness: m; NPP: kg/m2/y; time: y 
+ time     npp_each_PFT_for_5_PFTs   root_input  del_c14_resp  ann_resp_(kgC/m2/y) ann_dC/dt_(kgC/m2/y)  delPeatHt_(cm)  peat_depth  peat_mass  WTD
