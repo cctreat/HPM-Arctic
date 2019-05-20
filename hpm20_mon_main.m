@@ -31,7 +31,7 @@
 % hpm20_mon_params_Toolik;
 % hpm20_mon_params_Lakkasuo;
 % hpm20_mon_params_Seida;
-hpm20_mon_params_Ennadai;
+hpm20_mon_params_Ennadai_mac
 params=load('hpm20_mon_param_vals');
 
 nveg = params.num_veg;
@@ -531,7 +531,7 @@ for iyear = 2:sim_len_yr
 %            if (imonth > 3 && imonth < 11)  % potential thaw months only
 
 %                [ALD1, ALD2, ALD3] = hpm20_mon_activelayer1(soil_node_temp_month, soil_layer_temp_month, params_gipl);
-               [ALD1, ALD2, ALD3] = hpm20_mon_activelayer2(soil_node_temp_month_save((iyear-2):iyear, :, 1:63), params_gipl, iyear);
+               [ALD1, ALD2, ALD3] = hpm20_mon_activelayer2(soil_node_temp_month_save((iyear-2):iyear, :, 1:63), params_gipl);
                 
 %                 if ( abs(ALD1 - mon_ALD(sim
 
@@ -688,7 +688,7 @@ for iyear = 2:sim_len_yr
     
         decompfact_temp = (soil_layer_temp_month > (params_gipl.Tfr)) .* ...
                                   (2 + 3*exp(-soil_layer_temp_month/9)).^((soil_layer_temp_month - 10)/10);
-        cohort_decompfact_temp = interp1(params_gipl.soilLayerDepth(1:ndepth-1), decompfact_temp, depth);
+        cohort_decompfact_temp = interp1(params_gipl.soilNodeDepth(1:ndepth-1), decompfact_temp, depth);
                               
         mon_decompfact_water_top1000(sim_month) = mean(decompfact_water(1:min(params.sim_len, 1000)));
         mon_decompfact_temp_top1000(sim_month) = mean(cohort_decompfact_temp(1:min(params.sim_len, 1000)));

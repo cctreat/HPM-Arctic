@@ -62,7 +62,7 @@ ALFA0 = 20.14;  % snow heat transfer parameter (W/m2/K)
 max_ABS = 1.41e-6;    % numerical iteration threshold
 iter0 = 21;  % numerical iteration threshold
 E0 = 1.40e-6; % numerical iteration threshold
-G0 = 0.0005; % original value is 0.015; % geothermal heat flux? (W/m2)
+G0 = 0.005; % original value is 0.015; % geothermal heat flux? (W/m2)
 
 save('hpm20_mon_gipl_param_vals','Lpeat','Lmin','Lwat','Lice','Lair',...
     'Cpeat','Cmin','Cwat','Cice','Cair',...
