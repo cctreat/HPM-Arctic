@@ -28,9 +28,10 @@
 % READ IN PARAMETERS
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-hpm20_mon_params_Toolik;
+% hpm20_mon_params_Toolik;
 % hpm20_mon_params_Lakkasuo;
-hpm20_mon_params_Seida;
+% hpm20_mon_params_Seida;
+hpm20_mon_params_Ennadai;
 params=load('hpm20_mon_param_vals');
 
 nveg = params.num_veg;
@@ -1272,3 +1273,6 @@ end
 % END
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+%---------------------------
+% run figures
+hpm_figures

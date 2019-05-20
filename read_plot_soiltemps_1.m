@@ -34,7 +34,7 @@ array_dim = size(soil_node_temp_month_save);
 nyears_tot = array_dim(1);
 nnodes_tot = array_dim(3);
 
-nnodes_above_bedrock = find(params_gipl.soilLayerDepth > 10,1) - 1;
+nnodes_above_bedrock = find(params_gipl.soilNodeDepth > 10,1) - 1;
 
 % make array of monthly layer temps for final 'nyears' years of simulation
 
@@ -56,10 +56,10 @@ figure(41)
 % contourf(monthly_layer_temps_nyears(1800:end,:)',15,':y')
 % contourf(monthly_layer_temps_nyears(1:end,:)',15,':y')
 %contourf(monthly_layer_temps_nyears_10yr_mean(1:end, 1:41)',15,':y') %top 3 m, decadal means
-contourf(1:length(monthly_layer_temps_nyears_10yr_mean), soilLayerDepth(1:41), ...
+contourf(1:length(monthly_layer_temps_nyears_10yr_mean), soilNodeDepth(1:41), ...
     monthly_layer_temps_nyears_10yr_mean(1:end, 1:41)',15,':y') %top 3 m, decadal means
 set(gca,'YDir','reverse') 
 
-ystep = ( soilLayerDepth(1) + soilLayerDepth(2) ) / 2;
+ystep = ( soilNodeDepth(1) + soilNodeDepth(2) ) / 2;
 [X, Y] = meshgrid(1/12:1/12:nyears, ystep:ystep:10);
 
