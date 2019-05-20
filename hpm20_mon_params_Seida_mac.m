@@ -26,8 +26,8 @@ working_directory = pwd;
 
 out_name = strcat(working_directory, '/hpm20_mon_output_files/', site_name, sim_name);
 in_name = strcat(working_directory, '/hpm20_mon_input_files/', site_name, sim_name);
-clim_in_name = strcat(working_directory,'/hpm20_mon_climate_files/',site_name, monthly_T_P_name,'.csv');
-c14_in_name = strcat(working_directory,'/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
+clim_in_name = strcat('~/Dropbox/HPM30_monthly_time_step/hpm20_mon_climate_files/',site_name, monthly_T_P_name,'.csv');
+c14_in_name = strcat('~/Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 2500; % years BP (before 'present'), where 0 BP = 1950 CE
 sim_end = -150;   % years BP  (-150 BP = 2100 CE)
