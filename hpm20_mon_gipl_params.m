@@ -49,8 +49,8 @@ D_init = [0	0.5	1    2	3	  4	5	  10	15	  20	40	  60	80	100]; %soilLayerDepth (te
 % T_init = [-10 -5 -2 -1.16 -1.78 -2.18 -2.40 -2.36 -2.22 -2.09 -1.51 -0.98 -0.64 -0.64];  % TOOLIK node temperatures
 % T_init = [0 3 5 6 6 6 6 6 6 6 6 6 6 6];  % MER BLEUE node temperatures
 T_init = [-3 0 1 4 4 4 4 4 4 4 4 4 4 4];  % LAKKASUO node temperatures
-T_init = [-10 -5 -2 -1 -0.75 -0.5 -0.25 0 0 0 0 0 0 0];  % SEIDA node temperatures
 T_init = [-5 -3 -1 -0.5 -0.5 -0.25 0 0 0 0 0 0 0 0];  % STORDALEN node temperatures
+T_init = [-10 -5 -2 -1 -0.75 -0.5 -0.25 -1 -1 -1 -1 -1 0 0];  % SEIDA node temperatures
 
 Dn_init = length(D_init);   % WHAT IS THIS FOR??
 
@@ -62,7 +62,7 @@ ALFA0 = 20.14;  % snow heat transfer parameter (W/m2/K)
 max_ABS = 1.41e-6;    % numerical iteration threshold
 iter0 = 21;  % numerical iteration threshold
 E0 = 1.40e-6; % numerical iteration threshold
-G0 = 0.005; % original value is 0.015; % geothermal heat flux? (W/m2)
+G0 = 0.0015; % original value is 0.015; % geothermal heat flux? (W/m2)
 
 save('hpm20_mon_gipl_param_vals','Lpeat','Lmin','Lwat','Lice','Lair',...
     'Cpeat','Cmin','Cwat','Cice','Cair',...
