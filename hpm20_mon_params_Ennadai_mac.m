@@ -21,7 +21,7 @@
 
 site_name = 'Ennadai';
 sim_name = '_1_NPP05';
-monthly_T_P_name =  '_monthly_T_P_5810BP_2100CE'; 
+monthly_T_P_name =  '_monthly_T_P_5810BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '~/Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -31,7 +31,7 @@ clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthl
 c14_in_name = strcat('~/Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 5810; % years BP (before 'present'), where 0 BP = 1950 CE
-sim_end = -150;   % years BP  (-150 BP = 2100 CE)
+sim_end = -64;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
 gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) temperature effect on decomp
@@ -107,6 +107,7 @@ mosses =    [ 1 0 0 0 0 ];
 vasculars = [ 0 1 1 1 1 ];
 sedges =    [ 0 1 1 0 0 ];
 woody =     [ 0 0 0 1 1 ];
+roots =     [ 0 0 1 0 1 ];
 
 PFT_param = zeros(num_veg,12);
  
