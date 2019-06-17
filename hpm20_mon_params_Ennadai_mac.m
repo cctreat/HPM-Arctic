@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'Ennadai';
-sim_name = '_1_NPP05';
+sim_name = '_3_Shr2';
 monthly_T_P_name =  '_monthly_T_P_5810BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '~/Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -48,7 +48,7 @@ max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 % hpm_climate_params20;
 ann_temp = -9;  % site mean annual temp (C) for parameter values
 ann_ppt = 0.29;  % site total annual precipitation (m/y) for parameter values
-ann_ET_0 = 0.29;  % site base evapotranspiration (m/y) used to compute base run-off
+ann_ET_0 = 0.4;  % site base evapotranspiration (m/y) used to compute base run-off
 
 latitude = 61; % degrees North > 0
 
@@ -73,7 +73,7 @@ start_depth = 0.25; % depth of initial peat accumulation (m) at which water bala
 % *********************
 %  LATERAL HEAT FLUX PARAMETERS
 
-HeatFlux_DeltaT = 4;  % degree C shift in thawed peat monthly temp (note 1°C into 1 m saturated peat is about 1.5 W/m2)
+HeatFlux_DeltaT = 0;  % degree C shift in thawed peat monthly temp (note 1°C into 1 m saturated peat is about 1.5 W/m2)
 HeatFlux_StartYear = 250;  % first year of simulation with lateral heat flux 
 HeatFlux_EndYear   = 1500;  % last year of simulation with lateral heat flux 
 
@@ -114,10 +114,10 @@ PFT_param = zeros(num_veg,12);
 % *** PFT Parameters                   ** PD not used **
 %                 WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
 PFT_param(1,:) = [ 0.1   0.09    0.35   1.0   2.   19.   1.0    19.    29.     0.5      1.0     0.04  ]; % moss
-PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      1.0     0.25  ]; % sedge aboveground
-PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      0.0     0.225 ]; % sedge belowground
-PFT_param(4,:) = [ 0.3   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     1.3      1.0     0.15  ]; % shrub aboveground
-PFT_param(5,:) = [ 0.3   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     0.7      0.0     0.10  ]; % shrub belowground
+PFT_param(2,:) = [ 0.025 0.10    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      1.0     0.25  ]; % sedge aboveground
+PFT_param(3,:) = [ 0.025 0.10    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      0.0     0.225 ]; % sedge belowground
+PFT_param(4,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     1.3      1.0     0.15  ]; % shrub aboveground
+PFT_param(5,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     0.7      0.0     0.10  ]; % shrub belowground
 
 %  'tf_xxx' parameters below are used if vascular PFTs are partitioned into two
 %    component PFTs (aboveground and belowground), with some different parameters (e.g., k_exp)
@@ -210,6 +210,7 @@ k_exp_temp = 4.;   % litter incubation temperature (°C) from Hobbie paper
 
 k_0 = k_exp .* (1 + 3 * k_exp);  %see spreadsheet 'simple decomp models.xls'; adjusts k_0 for m/m0 model of decay
 k_month_0 = k_0 / 0.411 / 12;  % convert 'per-0.4-yr' (Hobbie study) to 'per-year' to 'per-month'
+% k_0 = (k_exp.*1.0633);
 
 % ???   does this make sense (next line)?????
 % k_month_0 = k_0 / 12 * (2 + 3*exp(-ann_temp/9)).^(-(ann_temp - 10)/10);  % convert year at 6° (mer bleue) to year at 10° (ref)
@@ -242,7 +243,7 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 0.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.5;   % see Julie Talbot email of 4 June 2014
@@ -253,7 +254,7 @@ NPP_rel = NPP_rel * (max_npp / total_npp)   % scale relative NPP of all PFTs so 
 % # years averaging WTD for vascular plant NPP (1 year for non-vascular)
 %   ?? add another lag value for trees different from other vascular?
 
-lag_years = 10;  
+lag_years = 5;  
 
 
 % ********************************************************
@@ -354,16 +355,16 @@ elseif (bog_fen_id < 2.5)   %  PERENNIAL FEN VALUES
 
 else   %  PERMAFROST SITE VALUES
     
-    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.25); % max runoff + max ET = mean annual precip + xx m/yr
-    Roff_c2 = 0.2;  % linear increase in runoff (m/y) per meter of total peat height
-    Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
+    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.5); % max runoff + max ET = mean annual precip + xx m/yr
+    Roff_c2 = 0.75;  % linear increase in runoff (m/y) per meter of total peat height
+%     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
     Roff_c2a = 1.2 * start_depth;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
 
     anoxia_scale_length = 3;  % exponential decline in decomp in catotelm from wfps_sat_rate to wfps_min_rate
 
-    runon_c1 = 0.5;  % total peat depth (m) at which run-on declines by ~50%
-    runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
-    runon_c3 = 0.05;  % magnitude of maximum run-on (m/month)
+    runon_c1 = 0.3;  % total peat depth (m) at which run-on declines by ~50%
+    runon_c2 = 0.8;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
+    runon_c3 = 0.01;  % magnitude of maximum run-on (m/month)
 
 end
 % ???  ***SHOULD Roff_c1 EVER BE ZERO???***
@@ -374,9 +375,9 @@ Roff_c4 = -0.1; % threshold water table depth for extra spillover (= Roff_c4 - W
 max_inundation = 0.02;  % 0.1; % max. water pooling depth (m) ABOVE peat surface
 
 % modifications June 2008 based on Lafleur et al. 2005 ET from Mer Bleue paper
-ET_wtd_1 = 0.15;   % WTD threshold for full ET (m)
+ET_wtd_1 = 0.35;   % WTD threshold for full ET (m)
 ET_wtd_2 = 0.5;   % WTD threshold for low ET (m)
-ET_min_frac = 0.2;   % min ET factor (fraction of PET)
+ET_min_frac = 0.4;   % min ET factor (fraction of PET)
 ET_param = 1/(ET_wtd_2 - ET_wtd_1);   % linear drop in ET as WTD drops from ET_wtd_1 to ET_wtd_2
 ET_snow_depth = 0.05; % monthly mean snowdepth (m) for which AET goes to zero (snow sublimation?
 
