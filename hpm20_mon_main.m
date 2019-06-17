@@ -771,6 +771,10 @@ for iyear = 2:sim_len_yr
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %     COMPUTE ?ANNUAL? ALD AND WTD FOR NPP (?? Or instead compute monthly NPP within month loop??)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if iyear > params.lag_years     
+    ann_lagWTD(iyear) = mean(ann_WTD(iyear:-1:(iyear-params.lag_years+1)));
+end
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %     COMPUTE ANNUAL NPP (or sum of monthly NPP)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
