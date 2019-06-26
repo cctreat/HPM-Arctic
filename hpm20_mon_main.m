@@ -31,7 +31,8 @@
 % hpm20_mon_params_Toolik;
 % hpm20_mon_params_Lakkasuo;
 % hpm20_mon_params_Seida;
-hpm20_mon_params_Ennadai_mac
+% hpm20_mon_params_Ennadai_win;
+hpm20_mon_params_JoeyLake_win;
 params=load('hpm20_mon_param_vals');
 
 nveg = params.num_veg;
@@ -62,7 +63,7 @@ m = zeros(sim_len_yr ,nveg);   % remaining mass in cohort (layer) i and veg type
 m_0 = zeros(sim_len_yr ,nveg); % total input mass in cohort i and veg type
 m_star = zeros(sim_len_yr ,nveg);   % = m / m_0
 c14_m = zeros(sim_len_yr ,nveg);  % 14-C in each PFT of each cohort
-k = zeros(sim_len_yr ,nveg);  % mass loss rate (1/y)
+k_mon = zeros(sim_len_yr ,nveg);  % mass loss rate (1/y)
 rootin = zeros(sim_len_yr ,nveg);
 ann_resp_array = zeros(sim_len_yr ,nveg);
 
@@ -102,13 +103,13 @@ dens_prev_temp = dens_prev;   % ## change to dens_prevtemp
 
 % arrays by time and veg type
 
-ann_npp = zeros(sim_len_yr ,nveg);   % ## change to ann_npp
+ann_npp = zeros(sim_len_yr ,nveg);   % matrix of annual NPP by PFT (biomass units; in carbon units = biomass/2) 
 
 % vectors by time 
 
 time = zeros(sim_len_yr ,1); 
 time_month = zeros(sim_len_yr * 12 ,1);
-ann_NPP = zeros(sim_len_yr ,1);     % ## change to ann_NPP
+ann_NPP = zeros(sim_len_yr ,1);     % total annual NPP summed across PFTs (in biomass units; in carbon units = biomass/2) 
 ann_RESP_C = zeros(sim_len_yr ,1);  % annual mass loss (in carbon units = biomass/2)   % ## change to ann_RESP_C
 ann_RESP_C_old = zeros(sim_len_yr ,1);  % annual mass loss (in carbon units = biomass/2)   % ## change to ann_RESP_C
 ann_RESP_C_new = zeros(sim_len_yr ,1);  % annual mass loss (in carbon units = biomass/2)   % ## change to ann_RESP_C
@@ -136,13 +137,11 @@ ann_del_water = zeros(sim_len_yr,1);   % meters/year
 
 ann_del_C_del_t = zeros(sim_len_yr ,1); % ## change to ann_del_C_del_t
 
-% annPPT = zeros(sim_len_yr ,1);   % m/yr  ## remove, as equal to ann_precip_forcing
 ann_WTD = zeros(sim_len_yr ,1);   % m  ## change to ann_wtd
 ann_peat_water = zeros(sim_len_yr ,1);  % m3/m2  ## change to ann_peat_water
 ann_total_water = zeros(sim_len_yr ,1);  % m3/m2  ## change to ann_total_water
 ann_lagWTD = zeros(sim_len_yr ,1);  % years  ## change to ann_lag_wtd
 ann_transmis = zeros(sim_len_yr ,1);   % relative hydraulic transmissivity (0-1)   
-% WATER = zeros(sim_len_yr ,7);   % remove
 % annTHETA = zeros(sim_len_yr ,1);
 % annWTD_VAR = zeros(sim_len_yr ,1);
 ann_del_peatwater = zeros(sim_len_yr ,1); % ## change to ann_*
@@ -188,6 +187,10 @@ mon_decompfact_temp_top1000 = zeros(sim_len_yr*12,1);
 junk11 = zeros(sim_len_yr*3,2);
 junk11_counter = 0;
 
+ann_m_star_1yr = zeros(sim_len_yr, nveg); % Store mass remaining of each PFT after 1 year for comparison to litter bags
+ann_m_star_2yr = zeros(sim_len_yr, nveg); % Store mass remaining of each PFT after 2 year for comparison to litter bags
+
+
 % GIPL SOIL TEMP OUTPUT  % ** change to ann_snow_depth
 
 ann_ALD1_max = zeros(sim_len_yr ,1);  % GIPL model annual max active layer depth to Tfr + FIT
@@ -197,7 +200,6 @@ ann_ALD_max = zeros(sim_len_yr ,1);  % selected one of above three to use
 soil_node_temp_month_save = zeros(sim_len_yr ,12,params_gipl.NumberOfSoilComputationNodes);
 soil_node_temp_month_saveMAT = zeros(sim_len_yr*12,params_gipl.NumberOfSoilComputationNodes);
 ann_snow_depth = zeros(sim_len_yr ,1);  % GIPL model max annual snowdepth (meters?) %CT not actuually used.
-% ann_ALD = zeros(sim_len_yr ,1);  % annual active layer max depth (Kudryavtsev)
 ann_layer_Tmax = zeros(params_gipl.ndepth-1 ,2);   % stores annual max T of each soil layer for permmafrost of current year and previous year
 tf_permafrost_layer_to10meters = zeros(params_gipl.ndepth-1,sim_len_yr);
 zero_vec_SoilNodes = zeros(1,params_gipl.NumberOfSoilComputationNodes);
@@ -256,19 +258,11 @@ WT_below_peat_counter = 0;
 
 T = readtable(params.clim_in_name);
 TA = table2array(T);
-% replace previous two lines with these 3 lines for UEF matlab version R2012a
-% T = importdata(params.clim_in_name,',',1);
-% TA_cell = struct2cell(T);
-% TA = cell2mat(TA_cell);
 
 years_forcing = TA(:,1);
 months_forcing = TA(:,2);
 mon_precip_forcing = TA(:,3);
 mon_temp_forcing = TA(:,4);
-
-% crudely adjust forcing temperature from Seida (-6.87C) to 'Stordalen (about -1C)
-% **** delta-T ****
-mon_temp_forcing = mon_temp_forcing + 4;
 
 %  NOTE: climate forcing timespan should match inputs in parameter file, or should overwrite them
 %  NOTE: climate forcing file should be chronological, so first line would have oldest driver (and largest year BP)
@@ -421,7 +415,7 @@ accum_mon_del_water = 0;  % used to accumulate monthyly new water when it is too
 %           in the code just after the beginning of the annual loop (excluded here for now)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-for iyear = 2:sim_len_yr 
+for iyear = 2: sim_len_yr 
     
     time(iyear) = iyear - 0.5;
     if (mod(iyear,500) == 0)   % tracks/writes out clock time per 500 y of simulation
@@ -722,7 +716,7 @@ for iyear = 2:sim_len_yr
 
         decompfact_water = hpm20_mon_decomp(depth, mon_wtd(sim_month), wfps, params, onevec, epsvec);
     
-        decompfact_temp = (soil_layer_temp_month > (params_gipl.Tfr)) .* ...
+        decompfact_temp = (soil_layer_temp_month > (params_gipl.Tfr - params_gipl.FIT)) .* ... %   CT modified to lowest temp of slush zone from midpoint
                                   (2 + 3*exp(-soil_layer_temp_month/9)).^((soil_layer_temp_month - 10)/10);
         cohort_decompfact_temp = interp1(params_gipl.soilNodeDepth(1:ndepth-1), decompfact_temp, depth);
                               
@@ -735,6 +729,7 @@ for iyear = 2:sim_len_yr
         m_star = m ./ (m_0 + epsarr);
         c14_m = c14_m .* m ./ (m_old + epsarr);
 
+        
 %          SAVE MONTHLY RESULTS
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -748,7 +743,18 @@ for iyear = 2:sim_len_yr
     end
 
     ann_resp_C_array = (m_beginyear - m) / 2.;  % before new litter is added below
-
+    
+    %add litter tracker here for comparison to litter bags. Finds m/m0
+    %after 12 and 24 months of decomposition
+    if (iyear > 2)
+        ann_m_star_1yr(iyear - 1, :) =  m(1, :) ./ (epsarr(iyear, :) + m_0(1,:)) + ...; %used calculation from later in code
+                roots .* (m(2, :) ./ (epsarr(iyear, :) + m_0(2,:))); %1st year of roots go into 2nd litter cohort.
+        ann_m_star_2yr(iyear -2, :) = (1- roots) .* m(2, :) ./ (epsarr(iyear, :) + m_0(2,:)) + ...;
+                roots .* mean(m(3:4, :) ./ (epsarr(iyear, :) + m_0(3:4, :))); %because roots go in deeper: roots from 1,2,3 years old
+    end
+   
+    
+    
 % sum up annual heterotrophic respiration by cohort and PFT; also 14C signal
 
     ann_RESP_C(iyear) = sum(sum(ann_resp_C_array));  % as carbon lost
@@ -794,7 +800,7 @@ for iyear = 2:sim_len_yr
 
     NPP = hpm20_mon_npp(growing_season_wtd(iyear),ann_lagWTD(iyear), ann_ALD_max(iyear), thick, params);
 
-%    NPP = NPP * annTEMP_NPP_FACT(iyear);
+ %    NPP = NPP * annTEMP_NPP_FACT(iyear);
 
     if (params.tf_old_new > 0.5) % if tf_old_new = 1, then implement old/new PFTs
            
@@ -976,7 +982,7 @@ M_TOTAL = sum(M);
 M_TOTAL2 = sum(ann_del_C_del_t);
 Z_TOTAL = depth(end);
 
-k_mean = sum(m .* k,2) ./ (M + epsvec);
+k_mean = sum(m .* k_mon,2) ./ (M + epsvec);
 c14_M = sum(c14_m,2) ./ (M + epsvec);
 del_c14_M = (c14_M - 1) * 1000;   % final del-14C profile
 

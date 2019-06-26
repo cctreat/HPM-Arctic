@@ -154,9 +154,9 @@ h3a=gca;
 set(h3a,'FontSize',14)
 
 subplot(2,1,2)
-plot(time,ann_del_water, time,ann_precip_forcing, time,ann_aet, time,ann_runoff, time,ann_runon, time,-ann_WTD, time,-ann_ALD_max,'LineWidth',3) 
+plot(time,ann_del_water, time,ann_precip_forcing, time,ann_aet, time,ann_runoff, time,ann_runon, time,-ann_WTD,'LineWidth',3) 
 xlim([dynamic_water_balance_year+10 nyears+500]);
-legend('\fontsize{14}dH2O_{cm}','\fontsize{14}ppt','\fontsize{14}ET','\fontsize{14}R_{off}','\fontsize{14}R_{on}','\fontsize{14}WT','\fontsize{14}ALT{cm}') 
+legend('\fontsize{14}dH2O_{cm}','\fontsize{14}ppt','\fontsize{14}ET','\fontsize{14}R_{off}','\fontsize{14}R_{on}','\fontsize{14}WT') 
 legend('orientation','Horizontal','Location','North')
 xlabel('\fontsize{14}time [y]')
 ylabel('\fontsize{14}depth [m]')
@@ -805,9 +805,6 @@ if (plot_flag > 0)
     fig14name = [params.out_name, '_smoothed_outputs'];
     saveas(h14c, fig14name,'jpg');
 
-
-
-
     figure(18)
     subplot(2,2,1)  % annual temperature (degC)
     plot(results_13_smooth(:,1),results_13_smooth(:,2),'LineWidth',3)
@@ -901,8 +898,9 @@ end
 
 
 %------------------------------------
-% Diagnostics for soil temperature
+% Figure 33. Diagnostics for soil temperature
 % -----------------------------------
+TwindowSt = 30;
 
 % ALT:
 figure(33)
@@ -914,21 +912,22 @@ legend('\fontsize{10}ALD1 @ 0','\fontsize{10}ALD2 @ -0.08', '\fontsize{10}ALD3@ 
     '\fontsize{10}Final ALD')
 legend('orientation','Horizontal','Location','South')
 
-
-layers_of_int = [1, 5, 11, 21, 41];
+layers_of_int = [1:3, 5, 11, 21, 41];
 subplot(4,1,2)
 plot(soil_node_temp_month_saveMAT(1:(100*12),layers_of_int))
 title('\fontsize{10}Soil Temps, first 100 years of simulation');
 legend('\fontsize{10}0 cm','\fontsize{10}20 cm', '\fontsize{10}50 cm',...
     '\fontsize{10}100 cm', '\fontsize{10}300 cm')
 legend('orientation','Horizontal','Location','South')
+
 subplot(4,1,3)
-plot(soil_node_temp_month_saveMAT((sim_start+55)*12:(sim_start+65)*12,layers_of_int)); hold on
-plot(mon_snowdepth(((sim_start+55)*12):((sim_start+65)*12))*100); 
-plot(-mon_wtd(((sim_start+55)*12):((sim_start+65)*12))*100); hold off
+plot(soil_node_temp_month_saveMAT((sim_start+TwindowSt)*12:(sim_start+TwindowSt+10)*12,layers_of_int)); hold on
+plot(mon_snowdepth(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12))*100); 
+plot(-mon_wtd(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12))*100); 
+line((0:120), mon_temp_forcing(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12)), 'Color', 'black');hold off
 title('\fontsize{10}Monthly soil temps, 2005-2015');
-legend('\fontsize{10}0 cm','\fontsize{10}20 cm', '\fontsize{10}50 cm',...
-    '\fontsize{10}100 cm', '\fontsize{10}300 cm', '\fontsize{10}SnowDepth_cm', '\fontsize{10}WTD')
+legend('\fontsize{10}0 cm','\fontsize{10}5 cm', '\fontsize{10}10 cm',  '\fontsize{10}20 cm', '\fontsize{10}50 cm',...
+    '\fontsize{10}100 cm', '\fontsize{10}300 cm', '\fontsize{10}SnowDepth_cm', '\fontsize{10}WTD', '\fontsize{10}Air Temp')
 legend('Location','East')
 subplot(4,1,4)
 plot(ann_Z_total); hold on
