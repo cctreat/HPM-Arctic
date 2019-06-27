@@ -19,9 +19,9 @@
 % Build outfile name from model version, site, climate, years, other; add director pathways
 %   have site and climate names used in climate file name.
 
-site_name = 'Ennadai';
-sim_name = '_3_Shr2';
-monthly_T_P_name =  '_monthly_T_P_5810BP_2015CE'; 
+site_name = 'JoeyL';
+sim_name = '_1_BD_short2';
+monthly_T_P_name =  '_monthly_T_P_5250BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '~/Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -30,7 +30,7 @@ in_name = strcat(dataWrite_workDirect, 'hpm20_mon_input_files/', site_name, sim_
 clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthly_T_P_name,'.csv');
 c14_in_name = strcat('~/Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
-sim_start = 5810; % years BP (before 'present'), where 0 BP = 1950 CE
+sim_start = 5250; % years BP (before 'present'), where 0 BP = 1950 CE
 sim_end = -64;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
@@ -46,11 +46,11 @@ max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 % read in monthly climate data from climate processing file
 % hpm_climate_params20;
-ann_temp = -9;  % site mean annual temp (C) for parameter values
-ann_ppt = 0.29;  % site total annual precipitation (m/y) for parameter values
-ann_ET_0 = 0.4;  % site base evapotranspiration (m/y) used to compute base run-off
+ann_temp = -3.4;  % site mean annual temp (C) for parameter values
+ann_ppt = 0.585;  % site total annual precipitation (m/y) for parameter values
+ann_ET_0 = 0.7;  % site base evapotranspiration (m/y) used to compute base run-off
 
-latitude = 61; % degrees North > 0
+latitude = 55.5; % degrees North > 0
 
 % compute monthly mean daylength (fraction of 24 hours) using algorithm from WBM code
 solstice	= 23.44/180 * pi;
@@ -243,7 +243,7 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.5;   % see Julie Talbot email of 4 June 2014
@@ -311,8 +311,8 @@ rootin_c5 = 0.04;    % no longer used, this was a smoothing term for the root di
 % **************
 %   BULK DENSITY
 
-min_bulk_dens = 50.;   % kg/m3
-del_bulk_dens = 80.;   % bulk density increase down profile, kg/m3
+min_bulk_dens = 80.;   % kg/m3
+del_bulk_dens = 40.;   % bulk density increase down profile, kg/m3
 dens_c1 = 0.333;  % m_star value at which bulk density rises halfway from min to max
 dens_c2 = 0.20;  % parameter controlling steepness of bulk density transition (smaller is steeper)
 OM_dens = 1300; % density of organic matter [kg/m3]
@@ -375,7 +375,7 @@ Roff_c4 = -0.1; % threshold water table depth for extra spillover (= Roff_c4 - W
 max_inundation = 0.02;  % 0.1; % max. water pooling depth (m) ABOVE peat surface
 
 % modifications June 2008 based on Lafleur et al. 2005 ET from Mer Bleue paper
-ET_wtd_1 = 0.3;   % WTD threshold for full ET (m)
+ET_wtd_1 = 0.2;   % WTD threshold for full ET (m)
 ET_wtd_2 = 0.5;   % WTD threshold for low ET (m)
 ET_min_frac = 0.2;   % min ET factor (fraction of PET)
 ET_param = 1/(ET_wtd_2 - ET_wtd_1);   % linear drop in ET as WTD drops from ET_wtd_1 to ET_wtd_2
