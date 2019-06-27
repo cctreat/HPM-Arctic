@@ -31,7 +31,9 @@
 % hpm20_mon_params_Toolik;
 % hpm20_mon_params_Lakkasuo;
 % hpm20_mon_params_Seida;
-hpm20_mon_params_Ennadai_mac
+% hpm20_mon_params_Ennadai_mac
+% hpm20_mon_params_JoeyL_mac
+hpm20_mon_params_Kukjuk_mac
 params=load('hpm20_mon_param_vals');
 
 nveg = params.num_veg;
@@ -754,7 +756,7 @@ for iyear = 2:sim_len_yr
     ann_RESP_C(iyear) = sum(sum(ann_resp_C_array));  % as carbon lost
     if (params.tf_old_new > 0.5)
         ann_RESP_C_new(iyear) = sum(sum(ann_resp_array(:,num_veg/2+1:num_veg),2));
-        ann_RESP _C_old(iyear) = sum(sum(ann_resp_array(:,1:num_veg/2),2));
+        ann_RESP_C_old(iyear) = sum(sum(ann_resp_array(:,1:num_veg/2),2));
     end
 
 % move layers down one step to make room for new surface litter cohort (m,m_0,m_star,c14_m,depth)
@@ -786,6 +788,10 @@ for iyear = 2:sim_len_yr
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %     COMPUTE ?ANNUAL? ALD AND WTD FOR NPP (?? Or instead compute monthly NPP within month loop??)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if iyear > params.lag_years     
+    ann_lagWTD(iyear) = mean(ann_WTD(iyear:-1:(iyear-params.lag_years+1)));
+end
+
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %     COMPUTE ANNUAL NPP (or sum of monthly NPP)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
