@@ -85,7 +85,9 @@ months_with_runoff = 12;
 runoff1 = params.Roff_c1/months_with_runoff * (1 + params.Roff_c2 * (sum(THICK) - params.Roff_c2a));  % modified run-off (March 2010)
 Roff = transmis * runoff1;
 
-%Roff = Roff * 0.75;
+if Roff < 0
+    Roff = 0;
+end
 
 mon_runoff = Roff;
 
