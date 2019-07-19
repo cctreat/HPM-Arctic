@@ -1,4 +1,4 @@
-function rmseErr = hpm20_mon_mainOptim(x) %height_fbt = x(1); NPP_diff_fenbog = x(2)
+function rmseErr = hpm20_mon_mainOptim(x) %height_fbt = x(1); NPP_diff_fenbog = x(2); anoxia_scalelength1 = x(3); anoxia_scalelength2 = x(4);
 % HPM20_mon.m
 % Monthly time-step version of HPM in matlab, based on HPM v.20
 % Steve Frolking, May 2018
@@ -27,7 +27,7 @@ function rmseErr = hpm20_mon_mainOptim(x) %height_fbt = x(1); NPP_diff_fenbog = 
 %   hpm20_mon_activelayer2        calculates active layer thickness (< 0 C for more than 2 years)
 %
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% READ IN PARAMETERS
+%% READ IN PARAMETERS
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % hpm20_mon_params_Toolik;
@@ -48,16 +48,22 @@ if (params.tf_old_new > 0.5)  % using Old-New carbon switch
     old_new_zeros = zeros(1,nveg/2);
 end
 
-if (params.pf_flag > 0.5) % simulation with permafrost
-    hpm20_mon_gipl_params_pf;   % parameters for UAF GIPL 2.0 model with permafrost
-else
-    hpm20_mon_gipl_params_no_pf;   % parameters for UAF GIPL 2.0 model without permafrost
-end
-
+%--------------------------------------------
+%  move GIPL outside of routine to speed up the model
+%--------------------------------------------
+% if (params.pf_flag > 0.5) % simulation with permafrost
+%     hpm20_mon_gipl_params_pf;   % parameters for UAF GIPL 2.0 model with permafrost
+% else
+%     hpm20_mon_gipl_params_no_pf;   % parameters for UAF GIPL 2.0 model without permafrost
+% end
+% 
 params_gipl = load('hpm20_mon_gipl_param_vals');   
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% INITIALIZE ARRAYS   (*** use a consistent naming format, e.g., ?ann_name?, ?mon_name? ***)
+ST1 = load('Monthly_soil_node_temp_matrix'); %have to be a little careful here, just uses soilT from last run.
+soil_node_temp_month_mat = ST1.soil_node_temp_month_saveMAT;
+
+%%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%% INITIALIZE ARRAYS   (*** use a consistent naming format, e.g., ?ann_name?, ?mon_name? ***)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % pre-allocate arrays to speed up simulations
 
@@ -202,8 +208,8 @@ ann_ALD1_max = zeros(sim_len_yr ,1);  % GIPL model annual max active layer depth
 ann_ALD2_max = zeros(sim_len_yr ,1);  % GIPL model annual max active layer depth to Tfr
 ann_ALD3_max = zeros(sim_len_yr ,1);  % GIPL model annual max active layer depth to Tfr - FIT
 ann_ALD_max = zeros(sim_len_yr ,1);  % selected one of above three to use
-soil_node_temp_month_save = zeros(sim_len_yr ,12,params_gipl.NumberOfSoilComputationNodes);
-soil_node_temp_month_saveMAT = zeros(sim_len_yr*12,params_gipl.NumberOfSoilComputationNodes);
+% soil_node_temp_month_save = zeros(sim_len_yr ,12,params_gipl.NumberOfSoilComputationNodes);
+% soil_node_temp_month_saveMAT = zeros(sim_len_yr*12,params_gipl.NumberOfSoilComputationNodes);
 ann_snow_depth = zeros(sim_len_yr ,1);  % GIPL model max annual snowdepth (meters?) %CT not actuually used.
 ann_layer_Tmax = zeros(params_gipl.ndepth-1 ,2);   % stores annual max T of each soil layer for permmafrost of current year and previous year
 tf_permafrost_layer_to10meters = zeros(params_gipl.ndepth-1,sim_len_yr);
@@ -247,8 +253,8 @@ mid_day_of_month = round((start_day_of_month + end_day_of_month)/2);
 ann_snowsublimation_accum = 0;  % June 2018: Hamon PET method averages 60% of 10%_loss_per_month for Toolik temperatures 
 WT_below_peat_counter = 0;
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% READ IN MONTHLY WEATHER DRIVER and other input files
+%%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%% READ IN MONTHLY WEATHER DRIVER and other input files
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % READ IN MONTHLY TEMPERATURE AND PRECIPITATION DRIVERS
@@ -331,7 +337,7 @@ ann_atm_del_c14 = atm_del_c14_time_series{:,1 + params.RCP_flag};
 ann_atm_c14 = ann_atm_del_c14 / 1000. + 1;  
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% set up to save output for ?fancy graphs of M* and/or moss fraction of peat
+%% set up to save output for ?fancy graphs of M* and/or moss fraction of peat
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % *********** moss fraction *********************************************
@@ -358,7 +364,7 @@ end
 % *****************************************************
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% INITIALIZE YEAR 1 COHORT, SOIL TEMPERATURE PROFILE, SWE, WFPS
+%% INITIALIZE YEAR 1 COHORT, SOIL TEMPERATURE PROFILE, SWE, WFPS
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % initialize surface cohort with aboveground litter inputs from all plant types
@@ -390,9 +396,9 @@ ann_npp(1,:) = NPP;
 ann_WTD(1) = params.wtd_0;
 growing_season_wtd(1) = params.wtd_0;
 
-% Set initial soil temperatures
-T_profile_prev = params_gipl.T_init_gipl;
-% ??? (next line)  ?? add permafrost flag to parameters??
+% % Set initial soil temperatures
+% T_profile_prev = params_gipl.T_init_gipl;
+% % ??? (next line)  ?? add permafrost flag to parameters??
 ann_ALD_max(1) = params.ald_0;  % arbitrary first year ALD (m)
 
 % calculate layer density, thickness, and depth
@@ -415,7 +421,7 @@ profile_counter = 1;  % used to write out some profiles near end of run
 accum_mon_del_water = 0;  % used to accumulate monthyly new water when it is too small to recompute WTD
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% LOOP THROUGH YEARS OF SIMULATION
+%% LOOP THROUGH YEARS OF SIMULATION
 %     NOTE: file ?hpm20_main_code_v1.m? has a number of climate perturbation simulation scripts
 %           in the code just after the beginning of the annual loop (excluded here for now)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -463,7 +469,7 @@ for iyear = 2: sim_len_yr
     end
                                          
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%     LOOP THROUGH MONTHS OF YEAR
+%%     LOOP THROUGH MONTHS OF YEAR
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     m_beginyear = m;
@@ -513,11 +519,15 @@ for iyear = 2: sim_len_yr
                 ann_snowsublimation_accum = ann_snowsublimation_accum + month_snowsublimation;
 % CALL GIPL2 MONTHLY (save final day T(z) & SWE for next month; save T(z), SWE, rainfall, snowmelt, snowdepth)
 
-% call GIPL2 monthly 
-        [soil_layer_temp_month, soil_node_temp_month, soilTemp] = ...
-            hpm20_mon_gipl2(iyear, imonth, num_days_in_month, T_profile_prev, daily_air_temp_for_month, ...
-                    snowDepth, ALFA, depth, thick, wfps, porosity, dens, params, params_gipl);
-        
+%% call GIPL2 monthly 
+%         [soil_layer_temp_month, soil_node_temp_month, soilTemp] = ...
+%             hpm20_mon_gipl2(iyear, imonth, num_days_in_month, T_profile_prev, daily_air_temp_for_month, ...
+%                     snowDepth, ALFA, depth, thick, wfps, porosity, dens, params, params_gipl);
+
+%  calculate soil_layer_temperature for the month
+    soil_node_temp_month = soil_node_temp_month_mat(sim_month, :);
+    soil_layer_temp_month = 0.5*(soil_node_temp_month(1:params_gipl.ndepth-1) + soil_node_temp_month(2:params_gipl.ndepth));
+% then go on with the calcs.
           layer_frozen = -((soil_layer_temp_month > 0) - 1);  % =0 if unfrozen, =1 otherwise (for transmissivity and infiltration and AET?)
         if (imonth == 1) 
             ann_layer_Tmax(:,2) = ann_layer_Tmax(:,1);
@@ -531,34 +541,8 @@ for iyear = 2: sim_len_yr
                 (ann_layer_Tmax(:,1) < (params_gipl.Tfr + 0*params_gipl.FIT));
         end
         
-% trying to add some heat to the unfrozen layers
-%    heat is added by increasing node temps by 'MoHeatIn' (°C) each month
-%    (only to unfrozen layers within depth range of ???
-
-          node_thawed = soil_node_temp_month > 0;  % =0 if frozen, =1 otherwise (for transmissivity and infiltration and AET?)   
-          node_HeatIn =(params_gipl.soilNodeDepth <= ann_Z_total(iyear-1)); % add it to the peat only
-          MoHeatIn_C = params.HeatFlux_DeltaT * (iyear >= params.HeatFlux_StartYear) * (iyear <= params.HeatFlux_EndYear);
-
-          if (params.HeatFlux_DeltaT > 0)
-              soilTemp    = soilTemp +  MoHeatIn_C* node_HeatIn .* node_thawed ;   % value at end of month; need to modified so it only dumps into peat.
-          else
-              for inode = 1:(params_gipl.ndepth-1)
-                  if (soilTemp(inode) > 0)
-                      if (node_HeatIn(inode) * node_thawed(inode) > 0)
-                          soilTemp(inode) = max(0.1, soilTemp(inode) + params.HeatFlux_DeltaT);
-                      end
-                  end
-              end
-          end
           
-          
-          soilTemp    = soilTemp +  MoHeatIn_C* node_HeatIn .* node_thawed ;   % value at end of month; need to modified so it only dumps into peat.
-%  
-          T_profile_prev = soilTemp;
-          soil_node_temp_month_save(iyear ,imonth,:) = soil_node_temp_month;
-          soil_node_temp_month_saveMAT(sim_month,:) = soil_node_temp_month;
-          
-% COMPUTE MONTHLY ALD  (invoke this only with permafrost, or use for seasonal frost layer as well?)
+%% COMPUTE MONTHLY ALD  (invoke this only with permafrost, or use for seasonal frost layer as well?)
 %   (invoke this only with permafrost during thaw season?). Montly ALD is used in water
 %   balance, annual ALD is used for NPP.
 
@@ -567,7 +551,7 @@ for iyear = 2: sim_len_yr
 %            if (imonth > 3 && imonth < 11)  % potential thaw months only
 
 %                [ALD1, ALD2, ALD3] = hpm20_mon_activelayer1(soil_node_temp_month, soil_layer_temp_month, params_gipl);
-               [ALD1, ALD2, ALD3] = hpm20_mon_activelayer2(soil_node_temp_month_saveMAT((sim_month -23):sim_month, 1:63), params_gipl);
+               [ALD1, ALD2, ALD3] = hpm20_mon_activelayer2(soil_node_temp_month_mat((sim_month -23):sim_month, 1:63), params_gipl);
                 
 %  which is best ALD metric, 1 or 2 or 3?
                 mon_ALD1(sim_month) = ALD1;
@@ -587,7 +571,7 @@ for iyear = 2: sim_len_yr
         end   % pf_flag = true (=1)
 
 
-% COMPUTE TERMS MONTHLY WATER BALANCE (delWater = Rain + snowmelt + runon ? AET ? runoff)
+%% COMPUTE TERMS MONTHLY WATER BALANCE (delWater = Rain + snowmelt + runon ? AET ? runoff)
 
         if (flag1 > 0.5)  % compute monthly water balance
             
@@ -612,10 +596,6 @@ for iyear = 2: sim_len_yr
             mon_del_water(sim_month) = mon_water_in - mon_water_out;
             ann_del_water(iyear) = ann_del_water(iyear) + mon_water_in - mon_water_out;
 
-% DEBUG TEST
-%             if ((sim_month) == 3006)
-%                 junk = 1;
-%             end
             
 % COMPUTE WTD AND WFPS(Z), only if monthly delta water > threshold
 
@@ -671,12 +651,7 @@ for iyear = 2: sim_len_yr
                  junk = 1;
              end
             
-
-% DEBUG TEST                
-%                 if (mon_wtd(sim_month) > 50)
-%                     junk = 1;
-%                 end
-                
+             
             else  % very small net monthly water balance term -- skip computations
                 mon_wtd(sim_month) = mon_wtd(sim_month-1);
                 junk11_counter = junk11_counter + 1;
@@ -713,13 +688,13 @@ for iyear = 2: sim_len_yr
         end
         
                 
-%          COMPUTE MONTHLY DECOMPOSITION (?? Lose peat mass, but don?t recompute peat profile??)
+%%          COMPUTE MONTHLY DECOMPOSITION (?? Lose peat mass, but don?t recompute peat profile??)
 
         decompfact_water = hpm20_mon_decomp(depth, mon_wtd(sim_month), wfps, params, onevec, epsvec);
     
         decompfact_temp = (soil_layer_temp_month > (params_gipl.Tfr)) .* ... 
                                   (2 + 3*exp(-soil_layer_temp_month/9)).^((soil_layer_temp_month - 10)/10);
-        cohort_decompfact_temp = interp1(params_gipl.soilNodeDepth(1:ndepth-1), decompfact_temp, depth);
+        cohort_decompfact_temp = interp1(params_gipl.soilNodeDepth(1:params_gipl.ndepth-1), decompfact_temp, depth);
                               
         mon_decompfact_water_top1000(sim_month) = mean(decompfact_water(1:min(params.sim_len, 1000)));
         mon_decompfact_temp_top1000(sim_month) = mean(cohort_decompfact_temp(1:min(params.sim_len, 1000)));
@@ -1005,21 +980,6 @@ k_mean = sum(m .* k_mon,2) ./ (M + epsvec);
 c14_M = sum(c14_m,2) ./ (M + epsvec);
 del_c14_M = (c14_M - 1) * 1000;   % final del-14C profile
 
-% reconstWTD = zeros(istep,1);
-% reconstWTD(:,1) = (m(:,5) * params.WTD_opt(5) + m(:,6) * params.WTD_opt(6) + m(:,7) * params.WTD_opt(7)...
-%     + m(:,8) * params.WTD_opt(8) + m(:,9) * params.WTD_opt(9))...
-%     ./ (m(:,5) + m(:,6) + m(:,7) + m(:,8) + m(:,9) + eps);
-% 
-
-log10junk = 2.14287*onevec - 0.042857 * dens;
-hydrconjunk = exp(log(10) * log10junk);
-junk3 = thick .* hydrconjunk;
-denom = sum(junk3);
-hyd_trans_profile = zeros(params.sim_len,1);
-for ijunk = 1:1:iyear
-%    hyd_trans_profile(ijunk) = 0.5 * (1 + sum(junk3(ijunk:end)) / denom);   % hydraulic transmissivity profile
-    hyd_trans_profile(ijunk) = params.Roff_c3 + (1-params.Roff_c3) * sum(junk3(ijunk:end)) / denom;   % hydraulic transmissivity profile
-end
 
 wfps_c1a = 0.03;
 wfps_c2a = 0.5;
