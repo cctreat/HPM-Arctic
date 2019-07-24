@@ -1,4 +1,8 @@
-function rmseErr = hpm20_mon_mainOptim(x) %height_fbt = x(1); NPP_diff_fenbog = x(2); anoxia_scalelength1 = x(3); anoxia_scalelength2 = x(4);
+function rmseErr = hpm20_mon_mainOptim(x) %start runon/runoff = x(1), ...
+% height_fbt = x(2); NPP_diff_fenbog = x(3); 
+% anoxia_scalelengthFen = x(4); anoxia_scalelengthBog = x(5);
+
+
 % HPM20_mon.m
 % Monthly time-step version of HPM in matlab, based on HPM v.20
 % Steve Frolking, May 2018
@@ -39,6 +43,9 @@ function rmseErr = hpm20_mon_mainOptim(x) %height_fbt = x(1); NPP_diff_fenbog = 
 % hpm20_mon_params_CCRP_win;
 % hpm20_mon_params_Kukjuk_mac;
 params=load('hpm20_mon_param_vals');
+params.Roff_c2a = x(1);
+params.runon_c1 = x(1);
+params.anoxia_scale_length = x(4);
 
 nveg = params.num_veg;
 sim_len_yr = params.sim_len
@@ -901,9 +908,9 @@ end
  % induce height-related shift to ombrotrophy (low O2 penetration/anoxia
  % scale length) + decrease in NPP
  %---------------------------
- if ann_Z_total(iyear) > x(1)
-     params.anoxia_scale_length = params.anoxia_scale_length2;
-     params.NPP_rel = params.NPP_rel1 * x(2);
+ if ann_Z_total(iyear) > x(2)
+     params.anoxia_scale_length = x(5);
+     params.NPP_rel = params.NPP_rel1 * x(3);
 %  else
 %      params.NPP_rel = params.NPP_rel1;
  end
@@ -1018,13 +1025,11 @@ disp(sprintf('total dC/dt (kg C/m2): %d ',M_TOTAL2));
 results_1 = [time depth M M_0 k_mean dens m del_c14_M];  
 
 % data core ages, depths & find rows in results dataset
-joeyL_age = [-50 1080 1410 2590 3470 5520 5810 6520 6620 7020 7550 7960];
-joeyL_depths = [0.0  26.0  44.0  74.5  89.5  97.0 117.5 126.5 140.0 151.0 222.0 299.0];
-joeyL_offset = min(joeyL_age) - params.sim_end;
-joeyL_ageIndex = joeyL_age - min(joeyL_age) + joeyL_offset;
+modCore_offset = min(params.obsCore_age) - params.sim_end;
+modObs_ageIndex = params.obsCore_age - min(params.obsCore_age) + modCore_offset;
 % checked against newly created vector Age_BP, which is derived from time
 % vector that goes into results_1
 
 
-rmseErr = rmse_modData(results_1(joeyL_ageIndex, 2)*100, joeyL_depths.');
+rmseErr = rmse_modData(results_1(modObs_ageIndex, 2)*100, params.obsCore_depths.');
 return
