@@ -306,6 +306,18 @@ ann_temp_forcing = (mon_temp_forcing(jan) + mon_temp_forcing(feb) + ...
     mon_temp_forcing(sep) + mon_temp_forcing(oct) + ...
     mon_temp_forcing(nov) + mon_temp_forcing(dec)) / 12.;
 
+% CALCULATE MONTHLY TEMPERATURE INDEX FOR USE IN NPP FUNCTION
+monTEMP_NPP_FACT = mon_temp_forcing > 0;
+monTEMP_NPP_FACT = monTEMP_NPP_FACT .* params.q10_npp.^((mon_temp_forcing-params.ann_temp)/10);
+annTEMP_NPP_FACT = monTEMP_NPP_FACT(jan) + monTEMP_NPP_FACT(feb) + ...
+    monTEMP_NPP_FACT(mar) + monTEMP_NPP_FACT(apr) + monTEMP_NPP_FACT(may) + ...
+    monTEMP_NPP_FACT(jun) + monTEMP_NPP_FACT(jul) + monTEMP_NPP_FACT(aug) + ...
+    monTEMP_NPP_FACT(sep) + monTEMP_NPP_FACT(oct) + ...
+    monTEMP_NPP_FACT(nov) + monTEMP_NPP_FACT(dec);
+% ratio to modern reference (1975 to 2010):
+annTEMP_NPP_FACT_ref = mean(annTEMP_NPP_FACT(find(years_BP > -60 & years_BP <= -25)));
+annTEMP_NPP_FACT = annTEMP_NPP_FACT / annTEMP_NPP_FACT_ref;
+
 
 % READ IN ATMOSPHERIC DEL-14C AND INTERPOLATE TO ANNUAL
 
@@ -782,8 +794,7 @@ end
 % calculate annual productivity for each veg type as function of WTD
 
     NPP = hpm20_mon_npp(growing_season_wtd(iyear),ann_lagWTD(iyear), ann_ALD_max(iyear), thick, params);
-
-%    NPP = NPP * annTEMP_NPP_FACT(iyear);
+    NPP = NPP * annTEMP_NPP_FACT(iyear);
 
     if (params.tf_old_new > 0.5) % if tf_old_new = 1, then implement old/new PFTs
            
