@@ -1,5 +1,5 @@
 function rmseErr = hpm20_mon_mainOptim(x) %start runon/runoff = x(1), ...
-% height_fbt = x(2); NPP_diff_fenbog = x(3); 
+% height_fbt = x(2); NPP_max = x(3); 
 % anoxia_scalelengthFen = x(4); anoxia_scalelengthBog = x(5);
 
 
