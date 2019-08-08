@@ -30,7 +30,7 @@ if (params.pf_flag < 0.5)   % no permafrost
 
     transmis = sum(THICK(trans_counter_wt:end) .* HydrCond(trans_counter_wt:end)) / ...
                    sum(THICK(1:end) .* HydrCond(1:end));    
-
+display('no pf flag')
 else   %  permafrost
 
     trans_counter_pf = find(DEPTH > ALT,1);
@@ -80,10 +80,11 @@ transmis = transmis * (sum(layer_frozen(1:3)) < 3);  % no runoff is surface peat
 %      modify for monthly?
 %  ?  Roff_c4: threshold WTD (negative, so inundation) for immediate spillover (= Roff_c4 ? WTD); now used in main code.
 
-months_with_runoff = 12;
+months_with_runoff = 8;
 
 runoff1 = params.Roff_c1/months_with_runoff * (1 + params.Roff_c2 * (sum(THICK) - params.Roff_c2a));  % modified run-off (March 2010)
 Roff = transmis * runoff1;
+
 
 if Roff < 0
     Roff = 0;
@@ -91,6 +92,8 @@ end
 
 mon_runoff = Roff;
 
+% display([trans_counter_wt display(trans_counter_pf)])
+% display([runoff1 transmis Roff])
 % END RUNOFF FUNCTION
 
 % ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
