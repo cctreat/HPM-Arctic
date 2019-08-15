@@ -23,7 +23,8 @@
 %   hpm20_gipl2_daily    UAF GI permafrost and soil temperature model from Marchenko
 %   hpm20_gipl_params_pf          parameters for UAF GI model when simulation has permafrost (max depth 120 m)
 %   hpm20_gipl_params_no_pf       parameters for UAF GI model when simulation doesn't have permafrost (max depth 10 m)
-
+%   hpm20_mon_activelayer2        calculates active layer thickness (< 0 C for more than 2 years)
+%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % READ IN PARAMETERS
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,8 +33,10 @@
 % hpm20_mon_params_Lakkasuo;
 % hpm20_mon_params_Seida;
 % hpm20_mon_params_Ennadai_win;
+% hpm20_mon_params_Selwyn_win;
 % hpm20_mon_params_Ennadai_mac
-% hpm20_mon_params_JoeyL_mac
+ hpm20_mon_params_JoeyL_win
+% hpm20_mon_params_CCRP_win;
 % hpm20_mon_params_Kukjuk_mac;
 params=load('hpm20_mon_param_vals');
 
@@ -148,7 +151,7 @@ ann_transmis = zeros(sim_len_yr ,1);   % relative hydraulic transmissivity (0-1)
 % annWTD_VAR = zeros(sim_len_yr ,1);
 ann_del_peatwater = zeros(sim_len_yr ,1); % ## change to ann_*
 ann_net_water_in = zeros(sim_len_yr ,1);  % ## change to ann_*
-age_depth = -9999 * ones(sim_len_yr ,30);
+age_depth0 = -9999 * ones(sim_len_yr ,30);
 age_depth2 = -9999 * ones(sim_len_yr ,375);
 growing_season_wtd = zeros(sim_len_yr,1);
 num_growing_season_months = zeros(sim_len_yr,1);
@@ -178,10 +181,16 @@ mon_aet = zeros(sim_len_yr*12,1);   % meters/month
 mon_pet = zeros(sim_len_yr*12,1);   % meters/month
 mon_water_content_error = zeros(sim_len_yr*12,1);   % meters
 
+
 % for debugging:
 mon_new_TOT_water_est = zeros(sim_len_yr*12,1);   % meters
 mon_new_TOT_water_est2 = zeros(sim_len_yr*12,1);   % meters
 mon_init_TOT_water_est = zeros(sim_len_yr*12,1);   % meters
+mon_WTcase = zeros(sim_len_yr*12,1); % to see which water table case is causing the really fast drop in WT.
+mon_water_in_track = zeros(sim_len_yr*12,1); % to see which water table case is causing the really fast drop in WT.
+mon_water_out_track = zeros(sim_len_yr*12,1); % to see which water table case is causing the really fast drop in WT.
+mon_runon0 = zeros(sim_len_yr*12,1);   % meters/month
+
 
 mon_decompfact_water_top1000 = zeros(sim_len_yr*12,1);
 mon_decompfact_temp_top1000 = zeros(sim_len_yr*12,1);
@@ -239,6 +248,7 @@ ann_resp_age2 = zeros(sim_len_yr ,1);   % age-mass weight of annual respiration
 start_day_of_month = [1,32,60,91,121,152,182,213,244,274,305,335];  % no leap years
 end_day_of_month =  [31,59,90,120,151,181,212,243,273,304,334,365];  % no leap years
 mid_day_of_month = round((start_day_of_month + end_day_of_month)/2);
+years_BP = params.sim_start:-1:params.sim_end;
 
 % for testing
 ann_snowsublimation_accum = 0;  % June 2018: Hamon PET method averages 60% of 10%_loss_per_month for Toolik temperatures 
@@ -307,6 +317,17 @@ ann_temp_forcing = (mon_temp_forcing(jan) + mon_temp_forcing(feb) + ...
     mon_temp_forcing(sep) + mon_temp_forcing(oct) + ...
     mon_temp_forcing(nov) + mon_temp_forcing(dec)) / 12.;
 
+% CALCULATE MONTHLY TEMPERATURE INDEX FOR USE IN NPP FUNCTION
+monTEMP_NPP_FACT = mon_temp_forcing > 0;
+monTEMP_NPP_FACT = monTEMP_NPP_FACT .* params.q10_npp.^((mon_temp_forcing-params.ann_temp)/10);
+annTEMP_NPP_FACT = monTEMP_NPP_FACT(jan) + monTEMP_NPP_FACT(feb) + ...
+    monTEMP_NPP_FACT(mar) + monTEMP_NPP_FACT(apr) + monTEMP_NPP_FACT(may) + ...
+    monTEMP_NPP_FACT(jun) + monTEMP_NPP_FACT(jul) + monTEMP_NPP_FACT(aug) + ...
+    monTEMP_NPP_FACT(sep) + monTEMP_NPP_FACT(oct) + ...
+    monTEMP_NPP_FACT(nov) + monTEMP_NPP_FACT(dec);
+% ratio to modern reference (1975 to 2010):
+annTEMP_NPP_FACT_ref = mean(annTEMP_NPP_FACT(find(years_BP > -60 & years_BP <= -25)));
+annTEMP_NPP_FACT = annTEMP_NPP_FACT / annTEMP_NPP_FACT_ref;
 
 % READ IN ATMOSPHERIC DEL-14C AND INTERPOLATE TO ANNUAL
 
@@ -417,7 +438,7 @@ accum_mon_del_water = 0;  % used to accumulate monthyly new water when it is too
 %           in the code just after the beginning of the annual loop (excluded here for now)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-for iyear = 2: sim_len_yr 
+for iyear = 2: sim_len
     
     time(iyear) = iyear - 0.5;
     if (mod(iyear,500) == 0)   % tracks/writes out clock time per 500 y of simulation
@@ -552,7 +573,7 @@ for iyear = 2: sim_len_yr
           soilTemp    = soilTemp +  MoHeatIn_C* node_HeatIn .* node_thawed ;   % value at end of month; need to modified so it only dumps into peat.
 %  
           T_profile_prev = soilTemp;
-          soil_node_temp_month_save(iyear ,imonth,:) = soil_node_temp_month;
+%           soil_node_temp_month_save(iyear ,imonth,:) = soil_node_temp_month;
           soil_node_temp_month_saveMAT(sim_month,:) = soil_node_temp_month;
           
 % COMPUTE MONTHLY ALD  (invoke this only with permafrost, or use for seasonal frost layer as well?)
@@ -609,11 +630,12 @@ for iyear = 2: sim_len_yr
             mon_del_water(sim_month) = mon_water_in - mon_water_out;
             ann_del_water(iyear) = ann_del_water(iyear) + mon_water_in - mon_water_out;
 
-% DEBUG TEST
-%             if ((sim_month) == 3006)
-%                 junk = 1;
-%             end
-            
+            % for debug WT drops
+            mon_water_in_track(sim_month) = mon_water_in;
+            mon_water_out_track(sim_month) = mon_water_out;
+            mon_runoff0(sim_month) = MonRunOff;
+
+           
 % COMPUTE WTD AND WFPS(Z), only if monthly delta water > threshold
 
             accum_mon_del_water = accum_mon_del_water + mon_del_water(sim_month);
@@ -631,7 +653,7 @@ for iyear = 2: sim_len_yr
             
                 if (pf_flag > 0.5)   % (1=potential permafrost, 0=no permafrost)
                     [wfps, new_WTD, new_PEAT_water, wat_cont_error, new_TOT_water, WT_below_peat_counter, ...
-                        new_TOT_water_est, new_TOT_water_est2] = ...
+                        new_TOT_water_est, new_TOT_water_est2, WTcase] = ...
                           hpm20_mon_wtd_wfps(mon_wtd_prev, TOT_water, new_water, Zstar, dens, thick,   ... 
                                              depth, porosity, onevec, zerovec, params, mon_ALD(sim_month), WT_BELOW_PEAT_counter);
                 else
@@ -649,6 +671,7 @@ for iyear = 2: sim_len_yr
                 mon_new_TOT_water_est(sim_month) = new_TOT_water_est;
                 mon_new_TOT_water_est2(sim_month) = new_TOT_water_est2;
                 mon_init_TOT_water_est(sim_month) = TOT_water + new_water;
+                mon_WTcase(sim_month) = WTcase;
 
                 mon_wtd(sim_month) = new_WTD;
                 mon_water_content_error(sim_month) = wat_cont_error;
@@ -709,16 +732,12 @@ for iyear = 2: sim_len_yr
             num_growing_season_months(iyear) = num_growing_season_months(iyear) + (mon_temp_forcing(sim_month) > 0);
         end
         
-% for debugging (June 2018)
-        if (mon_wtd(sim_month) > 0.1)
-            junk = 1;
-        end
                 
 %          COMPUTE MONTHLY DECOMPOSITION (?? Lose peat mass, but don?t recompute peat profile??)
 
         decompfact_water = hpm20_mon_decomp(depth, mon_wtd(sim_month), wfps, params, onevec, epsvec);
     
-        decompfact_temp = (soil_layer_temp_month > (params_gipl.Tfr - params_gipl.FIT)) .* ... %   CT modified to lowest temp of slush zone from midpoint
+        decompfact_temp = (soil_layer_temp_month > (params_gipl.Tfr)) .* ... 
                                   (2 + 3*exp(-soil_layer_temp_month/9)).^((soil_layer_temp_month - 10)/10);
         cohort_decompfact_temp = interp1(params_gipl.soilNodeDepth(1:ndepth-1), decompfact_temp, depth);
                               
@@ -732,8 +751,7 @@ for iyear = 2: sim_len_yr
         c14_m = c14_m .* m ./ (m_old + epsarr);
 
         
-%          SAVE MONTHLY RESULTS
-
+ 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 %     END LOOP THROUGH MONTHS OF YEAR
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -805,8 +823,7 @@ end
 % calculate annual productivity for each veg type as function of WTD
 
     NPP = hpm20_mon_npp(growing_season_wtd(iyear),ann_lagWTD(iyear), ann_ALD_max(iyear), thick, params);
-
- %    NPP = NPP * annTEMP_NPP_FACT(iyear);
+    NPP = NPP * annTEMP_NPP_FACT(iyear);
 
     if (params.tf_old_new > 0.5) % if tf_old_new = 1, then implement old/new PFTs
            
@@ -923,6 +940,40 @@ end
     ann_del_Z_total(iyear) = ann_Z_total(iyear) - ann_Z_total(iyear-1);
     ann_M_total(iyear) = sum(M);
 
+ 
+  % add cohort tracker:  
+    for i_age_depth = 1:1:30
+        if iyear > i_age_depth * 500
+            age_depth0(iyear,i_age_depth) = ann_Z_total(iyear) - depth(iyear - i_age_depth*500); % fills depth from top (most recent cohort = 1); adds total height at iyear; 
+          end
+    end
+
+ % --------------------------
+ % induce height-related shift to ombrotrophy (low O2 penetration/anoxia
+ % scale length) + decrease in NPP
+ %---------------------------
+ if ann_Z_total(iyear) > params.depth_MnOmTrans
+     params.anoxia_scale_length = params.anoxia_scale_length2;
+     params.NPP_rel = params.NPP_rel1 * params.bogNPPfac;
+%  else
+%      params.NPP_rel = params.NPP_rel1;
+ end
+
+ %-------------------------------
+ % Thermokarst scenario
+ % add runoff if active layer & peat height start to decrease
+ % only look if water balance calculations have started
+ if (flag1 > 0.5 && thermokarst_flag > 0.5)
+    lag_ALD = mean(ann_ALD_max((iyear - 9):iyear));
+    del_z = mean(diff(ann_Z_total((iyear - 9):iyear)));
+     if del_z < 0 && lag_ALD > params.ald_0  && ...
+             ann_Z_total(iyear) > params.Roff_c2a && years_forcing(sim_month) < -64
+         peat_loss_year = iyear - 0.1
+         params.Roff_c2a = max(ann_Z_total);
+         params.runon_c1 = max(ann_Z_total);
+     end
+ end
+         
 % *********** moss fraction *********************************************
     % calculate moss fraction of peat in 'nbins' vertical bins over 'maxheight' meters from base 
     %       (can be greater than total peat height; missing value is
@@ -983,7 +1034,6 @@ end  % for loop of iyear = 2:sim_len_yr
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 age = time;
-years_BP = flipud(time)-50;
 M_TOTAL = sum(M);
 M_TOTAL2 = sum(ann_del_C_del_t);
 Z_TOTAL = depth(end);
@@ -1042,9 +1092,9 @@ disp(sprintf('total dC/dt (kg C/m2): %d ',M_TOTAL2));
 % write out binary ('.mat') file of soil nodal temps (n-years, 12 months, 114 nodes)
 %   this file can be read and plotted with 'read_plot_soiltemps_1.m'
 
-soiltemp_filename = [params.out_name, '_soil_node_temp_month_save'];
-%save('soil_node_temp_month.mat', 'soil_node_temp_month_save')
-save(soiltemp_filename, 'soil_node_temp_month_save')
+% soiltemp_filename = [params.out_name, '_soil_node_temp_month_save'];
+% save(soiltemp_filename, 'soil_node_temp_month_saveMAT')
+save('Monthly_soil_node_temp_matrix.mat', 'soil_node_temp_month_saveMAT')
 
 % ***************************
 % save workspace variable arrays as '.mat' file
@@ -1072,8 +1122,10 @@ fprintf(fid4,'simulation length [y]      %g   \n',params.sim_len);
 fprintf(fid4,'simulation start [yr BP]   %g   \n',params.sim_start);
 fprintf(fid4,'simulation end [yr BP]     %g   \n',params.sim_end);
 fprintf(fid4,'permafrost flag [1=yes]    %g   \n',params.gipl_flag);
+fprintf(fid4,'thermokarst flag [1=yes]    %g   \n',params.thermokarst_flag);
 fprintf(fid4,'RCP flag [1=8.5,...,4=2.6] %g   \n',params.RCP_flag);
 fprintf(fid4,'start sim depth [m]        %6.2f \n',params.start_depth);
+fprintf(fid4,'Depth fen-bog transition [m] %6.2f \n',params.depth_MnOmTrans);
 fprintf(fid4,'initialization WTD [m]     %6.3f \n',params.wtd_0);
 fprintf(fid4,'14C decay [e-folding y]    %6.2f \n\n',params.tau_c14);
  
@@ -1119,7 +1171,8 @@ fprintf(fid4,'wfps_opt                   %6.2f \n',params.wfps_opt);
 fprintf(fid4,'wfps_sat_rate              %6.2f \n',params.wfps_sat_rate);
 fprintf(fid4,'wfps_min_rate              %8.4f \n',params.wfps_min_rate);
 fprintf(fid4,'wfps_curve                 %6.2f \n',params.wfps_curve);
-fprintf(fid4,'anoxic_scale_length [m]    %6.2f \n \n',params.anoxia_scale_length);
+fprintf(fid4,'anoxic_scale_length fen [m]    %6.2f \n \n',params.anoxia_scale_length1);
+fprintf(fid4,'anoxic_scale_length bog [m]    %6.2f \n \n',params.anoxia_scale_length2);
 
 fprintf(fid4,'dens_c1                    %6.2f \n',params.dens_c1);
 fprintf(fid4,'dens_c2                    %6.2f \n',params.dens_c2);
@@ -1130,6 +1183,7 @@ fprintf(fid4,'OM_bulk_dens  [kg/m3]      %6.2f \n\n',params.OM_dens);
 fprintf(fid4,'num_veg    %6.2f \n',params.num_veg);
 fprintf(fid4,'lag years for vascular WTD %6.2f \n',params.lag_years);
 fprintf(fid4,'max_total_NPP[kg/m2/y]    %6.2f \n',params.max_npp);
+fprintf(fid4,'NPP decrease in bog [kg/m2/y]    %6.2f \n',params.bogNPPfac);
 fprintf(fid4,'NPPQ10 value              %6.3f \n\n',params.q10_npp);
 if (params.tf_old_new > 0.5)
     num_unique_veg = params.num_veg/2;
@@ -1159,9 +1213,9 @@ else
     fprintf(fid4,'WTD_opt            %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.WTD_opt(1:num_unique_veg)');
     fprintf(fid4,'WTD_range_shallow  %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.WTD_range(1,(1:num_unique_veg)));
     fprintf(fid4,'WTD_range deep     %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.WTD_range(2,(1:num_unique_veg)));
-    fprintf(fid4,'ALD_opt            %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.PD_opt(1:num_unique_veg));
-    fprintf(fid4,'ALD_opt shallow    %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.PD_range(1,(1:num_unique_veg)));
-    fprintf(fid4,'ALD_opt deep       %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.PD_range(2,(1:num_unique_veg)));
+    fprintf(fid4,'ALD_opt            %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.ALD_opt(1:num_unique_veg));
+    fprintf(fid4,'ALD_opt shallow    %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.ALD_range(1,(1:num_unique_veg)));
+    fprintf(fid4,'ALD_opt deep       %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n', params.ALD_range(2,(1:num_unique_veg)));
     fprintf(fid4,'decomp k_0         %6.2f   %6.2f   %6.2f   %6.2f   %6.2f \n\n', params.k_0(1:num_unique_veg));
     
 end
@@ -1212,6 +1266,10 @@ fprintf(fid2h,' time     npp_each_PFT_for_%g_PFTs   root_input  del_c14_resp  an
 status = fclose(fid2h);
 dlmwrite(fname2, results_2,'precision','%10.5f');
 
+
+fname6 = [params.out_name, '_age_depth.csv'];
+dlmwrite(fname6,age_depth0);
+
 % *********** moss fraction *********************************************
 % if (flag_bins >0)
 %    fname5 = [params.out_name, '_moss_fraction.txt'];
@@ -1253,7 +1311,7 @@ annNPP_herb = sum(ann_npp .* (onevec * (params.vasculars - params.woody)), 2) / 
 annNPP_woody = sum(ann_npp .* (onevec * params.woody), 2) / 2;
 annNPP_moss = sum(ann_npp .* (onevec * params.mosses), 2) / 2;
 
-results_13 = [time ann_temp_forcing ann_precip_forcing ann_aet ann_runoff ann_WTD ann_NPP ...
+results_13 = [time ann_temp_forcing ann_precip_forcing ann_aet ann_runoff ann_WTD ann_ALD_max ann_NPP ...
     ann_RESP_C ann_del_C_del_t annNPP_herb annNPP_woody annNPP_moss ann_M_total/2 ann_Z_total];
 array_dim = size(results_13);
 
@@ -1286,12 +1344,14 @@ if (params.tf_old_new > 0.5)
 end
 
 fname13 = [params.out_name, '_basic_annual_output.txt'];
+fname13a = [params.out_name, '_basic_annual_output.csv'];
 fid13 = fopen(fname13,'w');  % time series of basic annual output
 
 fprintf(fid13,'HPM20_mon output file name     %28s   \n',params.out_name);
-fprintf(fid13,'  time  annTEMP   annPPT    annET   annRUNOFF  annWTD   annNPP    annDECOMP  annNCB    annNPP_herb annNPP_woody annNPP_moss peat_mass peat_height \n');
+fprintf(fid13,'time annTEMP annPPT annET annRUNOFF annWTD annALDmax annNPP annDECOMP annNCB annNPP_herb annNPP_woody annNPP_moss peat_mass peat_height\n');
 fprintf(fid13,'%7.1f %7.1f %9.5f %9.5f %9.5f %9.3f %9.5f %9.5f %9.5f %9.5f %9.5f %9.5f %9.2f %9.5f \n', results_13');
 status = fclose(fid13);
+dlmwrite(fname13a, results_13,'precision','%10.7f');
 
 fname14 = [params.out_name, '_basic_annual_smooth_output.txt'];
 fid14 = fopen(fname14,'w');  % time series of basic annual output
