@@ -191,7 +191,7 @@ end
 max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
-q10_npp = 1.5;   % see Julie Talbot email of 4 June 2014
+q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 max_npp1 = max_npp;
 NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
