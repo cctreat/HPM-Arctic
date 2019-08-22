@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'JoeyL';
-sim_name = '_Optim1';
+sim_name = '_Optim2';
 monthly_T_P_name =  '_monthly_T_P_8250BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -119,11 +119,11 @@ PFT_param = zeros(num_veg,12);
  
 % *** PFT Parameters                   ** PD not used **
 %                 WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
-PFT_param(1,:) = [ 0.1   0.09    0.35   1.0   2.   19.   1.0    19.    29.     0.5      1.0     0.04  ]; % moss
-PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      1.0     0.25  ]; % sedge aboveground
-PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      0.0     0.225 ]; % sedge belowground
-PFT_param(4,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     1.3      1.0     0.15  ]; % shrub aboveground
-PFT_param(5,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     0.7      0.0     0.10  ]; % shrub belowground
+PFT_param(1,:) = [ 0.1   0.09    0.20    1.0   2.   19.   1.0    19.    29.     1.0      1.0     0.04  ]; % moss
+PFT_param(2,:) = [ 0.025 0.05    0.15    1.0   2.   19.   0.5    1.0    2.0     2.0      1.0     0.25  ]; % sedge aboveground
+PFT_param(3,:) = [ 0.025 0.05    0.15    1.0   2.   19.   0.5    1.0    2.0     2.0      0.0     0.225 ]; % sedge belowground
+PFT_param(4,:) = [ 0.25   0.09    1.5     1.0   2.   19.   0.8    1.0    9.     1.3      1.0     0.15  ]; % shrub aboveground
+PFT_param(5,:) = [ 0.25   0.09    1.5     1.0   2.   19.   0.8    1.0    9.     0.7      0.0     0.10  ]; % shrub belowground
 
 
 % **************
@@ -359,7 +359,7 @@ save('hpm20_mon_param_vals','out_name', 'in_name', 'clim_in_name', 'c14_in_name'
     'WTD_opt','WTD_range','PD_opt','PD_range','ALD_opt','ALD_range',...
     'NPP_rel', 'NPP_rel1', 'max_npp', 'ag_frac_npp','bg_frac_npp','q10_npp', ...
     'rootin_d80','rootin_alpha','rootin_min','rootin_sedge_max','rootin_c5','rootin_max',...
-    'k_0','k_month_0','wfps_opt','wfps_curve','wfps_sat_rate','wfps_min_rate',...
+    'k_exp_temp', 'k_0','k_month_0','wfps_opt','wfps_curve','wfps_sat_rate','wfps_min_rate',...
     'min_bulk_dens','del_bulk_dens','dens_c1','dens_c2','OM_dens',...
     'ann_temp','ann_ppt', 'ann_ET_0','del_water_threshold',...
     'ET_wtd_1','ET_wtd_2','ET_min_frac','ET_param','ET_snow_depth',...

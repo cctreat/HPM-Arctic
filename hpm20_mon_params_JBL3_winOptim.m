@@ -19,9 +19,9 @@
 % Build outfile name from model version, site, climate, years, other; add director pathways
 %   have site and climate names used in climate file name.
 
-site_name = 'Ennadai';
-sim_name = '_optim3';
-monthly_T_P_name =  '_monthly_T_P_5810BP_2015CE'; 
+site_name = 'JBL3';
+sim_name = '_0'; 
+monthly_T_P_name =  '_monthly_T_P_7710BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -30,7 +30,7 @@ in_name = strcat(dataWrite_workDirect, 'hpm20_mon_input_files/', site_name, sim_
 clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthly_T_P_name,'.csv');
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
-sim_start = 5810; % years BP (before 'present'), where 0 BP = 1950 CE
+sim_start = 7710; % years BP (before 'present'), where 0 BP = 1950 CE
 sim_end = -64;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
@@ -38,26 +38,23 @@ gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) 
 %   gipl_flag should always be 1??
 RCP_flag = 1; % 1 = RCP8.5, 2 = RCP6.0, 3 = RDCP4.5, 4 = RCP2.6 (used for 21st century 14C values from Heather Graven)
 pf_flag = 1; % if 1 site has or may sometimes have permafrost; otherwise 0 
-tf_old_new = 0; %switch for old new C, not used in optimization
+
+% **************
+% core data for RMSE
+obsCore_age = [-60	1240	2420	3460	4120	5640	7710];
+obsCore_depths = [0	95.5	111.5	135.5	151.5	195.5	244.5];
 
 %************************
-% core data for RMSE
-obsCore_age = [-50 2970 4480 4840 5810];
-obsCore_depths = [0.0  12.5 98.5 137.0 183.0];
 
-obs_sedgeOff_ht = 0.45;
-
-max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
-% **************
-%  SITE CLIMATE
+%%  SITE CLIMATE
 
 % read in monthly climate data from climate processing file
 % hpm_climate_params20;
-ann_temp = -9;  % site mean annual temp (C) for parameter values
-ann_ppt = 0.29;  % site total annual precipitation (m/y) for parameter values
-ann_ET_0 = 0.4;  % site base evapotranspiration (m/y) used to compute base run-off
+ann_temp = -2.4;  % site mean annual temp (C) for parameter values
+ann_ppt = 0.61;  % site total annual precipitation (m/y) for parameter values
+ann_ET_0 = 0.7;  % site base evapotranspiration (m/y) used to compute base run-off
 
-latitude = 61; % degrees North > 0
+latitude = 52.9; % degrees North > 0
 
 % compute monthly mean daylength (fraction of 24 hours) using algorithm from WBM code
 solstice	= 23.44/180 * pi;
@@ -71,15 +68,19 @@ for (imonth = 1:12)
     dayLength(imonth) = (1-acos(arg)/pi);
 end
 
-%  some initialization of threshold values
 
-ald_0 = 1.0;  % first year active layer depth, if needed (m)
+%%  some initialization of threshold values
+
+ald_0 = 1.25;  % first year active layer depth, if needed (m) &  threshold for thermokarstID
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-% depth_MnOmTrans = 2.0; %depth of the transition from minerotrophy to ombrotrophy.
+depth_MnOmTrans = 0.8; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 0.6;
+max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
+
 
 % *********************
-%  LATERAL HEAT FLUX PARAMETERS
+%%  LATERAL HEAT FLUX PARAMETERS
 
 HeatFlux_DeltaT = 0;  % degree C shift in thawed peat monthly temp (note 1°C into 1 m saturated peat is about 1.5 W/m2)
 HeatFlux_StartYear = 250;  % first year of simulation with lateral heat flux 
@@ -98,8 +99,9 @@ wfps_sat_rate = 0.3;   % decomp rate multiplier at WFPS = 1.0 (i.e., at annual m
 wfps_min_rate = 0.001;   % decomp rate multiplier minimum, deep in catotelm.   Okay for monthly?
 wfps_curve = (wfps_sat - wfps_opt)^2 / (4 * (wfps_max_rate - wfps_sat_rate)); % parabola w/ value = wfps_sat_rate at WFPS = 1.0
 
+
 % **************
-%  VEGETATION 
+%%  VEGETATION 
 
 %   NOTE: plants don't ?grow? or accumulate biomass (change for trees [JT]?), so litterfall = NPP
 
@@ -123,8 +125,8 @@ PFT_param = zeros(num_veg,12);
 PFT_param(1,:) = [ 0.1   0.09    0.20    1.0   2.   19.   1.0    19.    29.     1.0      1.0     0.04  ]; % moss
 PFT_param(2,:) = [ 0.025 0.05    0.15    1.0   2.   19.   0.5    1.0    2.0     2.0      1.0     0.25  ]; % sedge aboveground
 PFT_param(3,:) = [ 0.025 0.05    0.15    1.0   2.   19.   0.5    1.0    2.0     2.0      0.0     0.225 ]; % sedge belowground
-PFT_param(4,:) = [ 0.25   0.09    1.5     1.0   2.   19.   0.8    1.0    9.     1.3      1.0     0.15  ]; % shrub aboveground
-PFT_param(5,:) = [ 0.25   0.09    1.5     1.0   2.   19.   0.8    1.0    9.     0.7      0.0     0.10  ]; % shrub belowground
+PFT_param(4,:) = [ 0.25   0.09    1.5    1.0   2.   19.   0.8    1.0    9.     1.3      1.0     0.15  ]; % shrub aboveground
+PFT_param(5,:) = [ 0.25   0.09    1.5    1.0   2.   19.   0.8    1.0    9.     0.7      0.0     0.10  ]; % shrub belowground
 
 
 % **************
@@ -147,7 +149,7 @@ for ii = 1:1:num_veg
 end
 
 % **************
-% DECOMPOSITION- LITTER QUALITY  
+%% DECOMPOSITION- LITTER QUALITY  
 
 % **************
 % ARCTIC VERSION  
@@ -163,6 +165,24 @@ k_month_0 = k_0 / 0.411 / 12;  % convert 'per-0.4-yr' (Hobbie study) to 'per-yea
 k_month_0 = k_month_0 * (2 + 3*exp(-k_exp_temp/9)).^(-(k_exp_temp - 10)/10);  % convert month at 4° (Hobbie incubation) to year at 10° (ref)
 
 
+% **************
+% NON-ARCTIC VERSION  
+
+% tt = 5; % years of decomp to match algorithms (5 is reasonable, i.e., long for litter bags)
+% k_0 = k_exp * (1 + ((exp(k_exp*tt) - 1) ./ (k_exp * tt) -1);
+% k_0_month = k_0 / 12;  % will this work okay?
+% k_month_0 = k_0 / 12 * (2 + 3*exp(-ann_temp/9)).^(-(ann_temp - 10)/10);  % convert year at 6° (mer bleue) to year at 10° (ref)
+
+%% BUILD TOTAL NPP SURFACE
+%     No Permafrost (pf_flag = 0) uses WTD and PD
+%      Permafrost (pf_flag = 1) uses WTD and ALD
+
+% ONLY MOSSES  (for sensitivity testing)
+% NPP_rel   = NPP_rel .* mosses;
+
+% ONLY VASCULAR  (for sensitivity testing)
+% NPP_rel   = NPP_rel .* vascular;
+
 if (pf_flag < 0.5)
     total_npp = hpm20_mon_vegNPP(WTD_opt,WTD_range,PD_opt,PD_range,NPP_rel,k_0,num_veg); % using peat depth
 else
@@ -174,19 +194,50 @@ end
 max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
-q10_npp = 1.8;   % see spreadsheet NPP-T response camill
+q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
 NPP_rel1 = NPP_rel;
-bogNPPfac = 1; %0.3851; % scale factor for relative decrease in NPP at fen-bog transition
+bogNPPfac = 1; %0.5854; % scale factor for relative decrease in NPP at fen-bog transition
 % # years averaging WTD for vascular plant NPP (1 year for non-vascular)
 %   ?? add another lag value for trees different from other vascular?
 
 lag_years = 5;  
 
 
+% ********************************************************
+% RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
+
+tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new_timing = 85;  % years before end of simulation to switch 
+
+if (tf_old_new > 0.5)
+    year_old2new = sim_len - tf_old_new_timing;
+    num_veg = 2. * num_veg;
+    PD_opt = [PD_opt PD_opt];
+    PD_range = [PD_range PD_range];
+    ALD_opt = [ALD_opt ALD_opt];
+    ALD_range = [ALD_range ALD_range];
+    WTD_opt = [WTD_opt WTD_opt];
+    WTD_range = [WTD_range WTD_range];
+    ag_frac_npp = [ag_frac_npp ag_frac_npp];
+    bg_frac_npp = [bg_frac_npp bg_frac_npp];
+    k_0 = [k_0 k_0];
+    k_month_0 = [k_month_0 k_month_0];
+    NPP_rel = [NPP_rel NPP_rel];
+    NPP_rel1 = NPP_rel;
+    mosses =    [ mosses mosses ];
+    vasculars = [ vasculars vasculars ];
+    sedges =    [ sedges sedges ];
+    woody =     [ woody woody ];
+    roots =     [roots roots];
+else
+    year_old2new = sim_len + tf_old_new_timing;  % i.e., never happens
+end
+
+
 % ****************************
-% ROOT PROFILES AND LITTER INPUT
+%% ROOT PROFILES AND LITTER INPUT
 
 % FOLLOWING BAUER (2004)
 %   sedge root litter input: exponential decay profile to 2 m; 80% above 0.2 to 0.3 m.
@@ -204,7 +255,7 @@ rootin_c5 = 0.04;    % no longer used, this was a smoothing term for the root di
 
 
 % **************
-%   BULK DENSITY
+%%   BULK DENSITY
 
 min_bulk_dens = 50.;   % kg/m3
 del_bulk_dens = 80.;   % bulk density increase down profile, kg/m3
@@ -214,7 +265,7 @@ OM_dens = 1300; % density of organic matter [kg/m3]
 
 
 % ****************************
-%  WATER BALANCE
+%%  WATER BALANCE
 
 del_water_threshold = 0.0002; % MINIMUM change in peat water (m) to recompute monthly water profile
 
@@ -238,7 +289,7 @@ if (bog_fen_id < 1.5)   % FEN-TO-BOG VALUES
 
 elseif (bog_fen_id < 2.5)   %  PERENNIAL FEN VALUES
     
-    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.1); % max runoff + max ET = mean annual precip
+    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.1); % max runoff + max ET = mean annual precip % m/mo
     Roff_c2 = 0.02;  % linear increase in runoff (m/y) per meter of total peat height
     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
 
@@ -250,16 +301,16 @@ elseif (bog_fen_id < 2.5)   %  PERENNIAL FEN VALUES
 
 else   %  PERMAFROST SITE VALUES
     
-    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.3); % max runoff + max ET = mean annual precip + xx m/yr
+    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.2); % max runoff + max ET = mean annual precip + xx m/yr. Annual value.
     Roff_c2 = 1.75;  % linear increase in runoff (m/y) per meter of total peat height
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
-%    Roff_c2a = 1.4;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
-
+%     Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
+% 
 %     anoxia_scale_length = 3.0;
 %     anoxia_scale_length1 = anoxia_scale_length;
-%     anoxia_scale_length2 = 0.8;
-   
-%    runon_c1 = 0.875;  % total peat depth (m) at which run-on declines by ~50%
+%     anoxia_scale_length2 = 0.3;
+%    
+%     runon_c1 = depth_runOnOff;  % total peat depth (m) at which run-on declines by ~50%
     runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
     runon_c3 = 0.02;  % magnitude of maximum run-on (m/month)
 
@@ -288,27 +339,26 @@ wfps_c3 = 20;
 
 
 % ****************************
-%  RADIOCARBON
+%%  RADIOCARBON
 
 tau_c14 = 5730. / log(2); % radiocarbon decay rate per year ('log' in matlab is natural logarithm)
-tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
-tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 
-% % write a few things to the terminal  (keep this?)
+% write a few things to the terminal  (keep this?)
 disp(sprintf('numveg: %d  total NPP (kg/m2/y): %d', num_veg, total_npp));
 disp(sprintf('ann_ppt (m/y): %d  ann_ET0 (m/y): %d, ann_runoff0 (m/y): %d', ann_ppt, ann_ET_0, Roff_c1));
 
 % ****************************
-%  SAVE PARAMETERS
+%%  SAVE PARAMETERS
+
 save('hpm20_mon_param_vals','out_name', 'in_name', 'clim_in_name', 'c14_in_name', 'site_name', 'sim_name', 'monthly_T_P_name', ...
-    'sim_len','sim_start','sim_end','tau_c14','max_pot_peat_ht','tf_old_new',...
-    'obsCore_age', 'obsCore_depths', 'obs_sedgeOff_ht',...
-    'gipl_flag','pf_flag','RCP_flag', 'latitude', 'dayLength', 'month_midday', ...
+    'sim_len','sim_start','sim_end','tau_c14','max_pot_peat_ht',...
+    'obsCore_age', 'obsCore_depths',...
+    'gipl_flag','pf_flag',  'RCP_flag', 'latitude', 'dayLength', 'month_midday', ...
     'start_depth', 'ald_0', 'wtd_0', 'lag_years', ...
-    'num_veg','mosses','vasculars','sedges','woody','roots',  ...
+    'num_veg','mosses','vasculars','sedges','woody','roots', 'tf_old_new','year_old2new', ...
     'WTD_opt','WTD_range','PD_opt','PD_range','ALD_opt','ALD_range',...
-    'NPP_rel', 'max_npp', 'ag_frac_npp','bg_frac_npp','q10_npp',...
+    'NPP_rel', 'NPP_rel1', 'max_npp', 'ag_frac_npp','bg_frac_npp','q10_npp', ...
     'rootin_d80','rootin_alpha','rootin_min','rootin_sedge_max','rootin_c5','rootin_max',...
     'k_exp_temp', 'k_0','k_month_0','wfps_opt','wfps_curve','wfps_sat_rate','wfps_min_rate',...
     'min_bulk_dens','del_bulk_dens','dens_c1','dens_c2','OM_dens',...
@@ -317,4 +367,5 @@ save('hpm20_mon_param_vals','out_name', 'in_name', 'clim_in_name', 'c14_in_name'
     'Roff_c1','Roff_c2','Roff_c3','Roff_c4','max_inundation','runon_c2','runon_c3',...
     'wfps_c1','wfps_c2','wfps_c3','HeatFlux_DeltaT', 'HeatFlux_StartYear','HeatFlux_EndYear');
 
-%'anoxia_scale_length','anoxia_scale_length2',  'Roff_c2a', 'runon_c1',
+%'depth_MnOmTrans','bogNPPfac', 'anoxia_scale_length','anoxia_scale_length1','anoxia_scale_length2',
+% 'Roff_c2a','runon_c1',
