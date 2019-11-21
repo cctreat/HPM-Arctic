@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'Selwyn';
-sim_name = '_1_optim3_2100_tk1m';
-monthly_T_P_name =  '_monthly_T_P_6580BP_2100CE'; 
+sim_name = '_1_optim3_control_2015_Tnpp';
+monthly_T_P_name =  '_monthly_T_P_6580BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -31,14 +31,14 @@ clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthl
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 6580; % years BP (before 'present'), where 0 BP = 1950 CE
-sim_end = -150;   % years BP  (-150 BP = 2100 CE)
+sim_end = -64;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
 gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) temperature effect on decomp
 %   gipl_flag should always be 1??
 RCP_flag = 1; % 1 = RCP8.5, 2 = RCP6.0, 3 = RDCP4.5, 4 = RCP2.6 (used for 21st century 14C values from Heather Graven)
 pf_flag = 1; % if 1 site has or may sometimes have permafrost; otherwise 0 
-thermokarst_flag = 1; % 1 if simulating inundation associated with permafrost thaw
+thermokarst_flag = 0; % 1 if simulating inundation associated with permafrost thaw
 
 % **************
 %  SITE CLIMATE
@@ -65,7 +65,7 @@ end
 
 
 %  some initialization of threshold values
-ald_0 = 1.0;  % first year active layer depth, if needed (m)
+ald_0 = 1.25;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
 depth_runOnOff = 1.7 ;% depth when run-on switches to runoff
@@ -116,10 +116,11 @@ PFT_param = zeros(num_veg,12);
 % *** PFT Parameters                   ** PD not used **
 %                 WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
 PFT_param(1,:) = [ 0.1   0.09    0.35   1.0   2.   19.   1.0    19.    29.     0.5      1.0     0.04  ]; % moss
-PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      1.0     0.25  ]; % sedge aboveground
-PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      0.0     0.225 ]; % sedge belowground
+PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      1.0     0.25  ]; % sedge aboveground
+PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      0.0     0.225 ]; % sedge belowground
 PFT_param(4,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     1.3      1.0     0.15  ]; % shrub aboveground
 PFT_param(5,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     0.7      0.0     0.10  ]; % shrub belowground
+
 
 
 % **************
@@ -187,7 +188,7 @@ end
 max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
-q10_npp = 1.5;   % see Julie Talbot email of 4 June 2014
+q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
 NPP_rel1 = NPP_rel;
@@ -201,7 +202,7 @@ lag_years = 5;
 % ********************************************************
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
-tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
 tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)

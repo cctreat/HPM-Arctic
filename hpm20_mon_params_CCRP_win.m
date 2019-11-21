@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'CCR'; %Campbell Creek core P
-sim_name = '0';
-monthly_T_P_name =  '_monthly_T_P_5250BP_2015CE'; 
+sim_name = '_0b';
+monthly_T_P_name =  '_monthly_T_P_9400BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -30,7 +30,7 @@ in_name = strcat(dataWrite_workDirect, 'hpm20_mon_input_files/', site_name, sim_
 clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthly_T_P_name,'.csv');
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
-sim_start = 5250; % years BP (before 'present'), where 0 BP = 1950 CE
+sim_start = 9400; % years BP (before 'present'), where 0 BP = 1950 CE
 sim_end = -64;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
@@ -38,8 +38,7 @@ gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) 
 %   gipl_flag should always be 1??
 RCP_flag = 1; % 1 = RCP8.5, 2 = RCP6.0, 3 = RDCP4.5, 4 = RCP2.6 (used for 21st century 14C values from Heather Graven)
 pf_flag = 1; % if 1 site has or may sometimes have permafrost; otherwise 0 
-
-max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
+thermokarst_flag = 0; % 1 if simulating inundation associated with permafrost thaw
 
 % **************
 %  SITE CLIMATE
@@ -65,10 +64,13 @@ for (imonth = 1:12)
 end
 
 %  some initialization of threshold values
-
 ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.04; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
+depth_runOnOff = 1.5 ;% depth when run-on switches to runoff
+depth_MnOmTrans = 2.5; %depth of the transition from minerotrophy to ombrotrophy.
+
+max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 % *********************
 %  LATERAL HEAT FLUX PARAMETERS
@@ -114,72 +116,11 @@ PFT_param = zeros(num_veg,12);
 % *** PFT Parameters                   ** PD not used **
 %                 WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
 PFT_param(1,:) = [ 0.1   0.09    0.35   1.0   2.   19.   1.0    19.    29.     0.5      1.0     0.04  ]; % moss
-PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      1.0     0.25  ]; % sedge aboveground
-PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   1.5    1.0    29.     1.0      0.0     0.225 ]; % sedge belowground
+PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      1.0     0.25  ]; % sedge aboveground
+PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      0.0     0.225 ]; % sedge belowground
 PFT_param(4,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     1.3      1.0     0.15  ]; % shrub aboveground
 PFT_param(5,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     0.7      0.0     0.10  ]; % shrub belowground
 
-%  'tf_xxx' parameters below are used if vascular PFTs are partitioned into two
-%    component PFTs (aboveground and belowground), with some different parameters (e.g., k_exp)
-%      generalize from sedge root to all roots?  Eliminate altogether?
-
-% tf_sedge_root =     [ 0 0 0 1 0 ];
-% tf_non_sedge_root = [ 0 0 0 0 1 ];
-% tf_moss =           [ 1 0 0 0 0 ];
-% tf_ag_pft =         [ 1 1 1 1 1 ] - tf_sedge_root - tf_non_sedge_root;
-
-% NON-ARCTIC VERSION
-%    non-arctic version will use peat height rather than active layer depth for NPP
-
-% num_veg = 13;
-% 
-% PFT_names = ['min_grass' 'min_herb' 'min_sedge' 'decid_shrub' ?brown_moss' 'hollow_sphagnum' 'lawn_sphagnum' ...       ?                  'hummock_sphagnum' 'feather_moss' 'omb_herb' 'omb_sedge' 'evrgn_shrub' 'tree']; 
-% 
-% mosses =    [ 0 0 0 0 1 1 1 1 1 0 0 0 0 ];
-% vasculars = [ 1 1 1 1 0 0 0 0 0 1 1 1 1 ];
-% sedges =    [ 0 0 1 0 0 0 0 0 0 0 1 0 0 ];
-% woody =     [ 0 0 0 1 0 0 0 0 0 0 0 1 1 ];
-
-% % *** PFT Parameters                                    ***ALD NOT USED****
-% %                  WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
-% PFT_param(1,:) =  [ 0.4    0.4    0.4    0.01  1.0   1.0   0.1    1.     1.     3*0.75   0.5     0.2  ]; % minerotrophic grass
-% PFT_param(2,:) =  [ 0.1    0.3    0.3    0.3   1.0   1.0   0.1    1.     1.     3*1.0    0.2     0.4  ]; % minerotrophic herb
-% PFT_param(3,:) =  [ 0.1    0.4    0.4    0.1   2.0   2.0   0.1    1.     1.     3*1.0    0.2     0.3  ]; % minerotrophic sedge
-% PFT_param(4,:) =  [ 0.2    0.2    1.0    1.0   2.0   2.0   0.1    1.     1.     3*0.5    0.5     0.25 ]; % deciduous shrub
-% PFT_param(5,:) =  [ 0.01   0.2    0.05   0.1   1.5   1.5   0.1    1.     1.     1*0.5    1.0     0.1  ]; % brown moss
-% PFT_param(6,:) =  [ 0.01   0.2    0.05   2.0   1.0   19.   0.1    1.     1.     1*0.5    1.0     0.1  ]; % hollow sphagnum
-% PFT_param(7,:) =  [ 0.1    0.3    0.4    2.0   1.0   19.   0.1    1.     1.     1*0.5    1.0     0.07 ]; % lawn sphagnum
-% PFT_param(8,:) =  [ 0.2    0.1    0.5    2.0   1.0   19.   0.1    1.     1.     1*0.5    1.0     0.05 ]; % hummock sphagnum
-% PFT_param(9,:) =  [ 0.4    0.4    0.6    4.0   6.0   19.   0.1    1.     1.     1*0.25   1.0     0.1  ]; % feathermoss
-% PFT_param(10,:) = [ 0.2    0.2    0.2    4.0   2.0   19.   0.1    1.     1.     1*0.25   0.5     0.3  ]; % ombrotrophic herb
-% PFT_param(11,:) = [ 0.2    0.3    0.3    4.0   2.0   19.   0.1    1.     1.     1*0.5    0.2     0.2  ]; % ombrotrophic sedge
-% PFT_param(12,:) = [ 0.3    0.3    1.0    4.0   2.0   19.   0.1    1.     1.     1*0.5    0.5     0.2  ]; % evergreen shrub
-% PFT_param(13,:) = [ 0.8    0.3    10.0   2.0   20.   10.   0.1    1.     1.     1*2.8    0.7     0.3  ]; % tree
-
-% REDUCING NON-ARCTIC PFT NUMBER TO TRY OLD/NEW C RUN AT MB
-
-% num_veg = 10;
-% 
-% PFT_1_name = ['min_sedge' 'decid_shrub' ?hollow_sphagnum? 'lawn_sphagnum? 'hummock_sphagnum' 'feather_moss' ...
-%                  'omb_herb' 'omb_sedge' 'evrgn_shrub' 'tree']; 
-% 
-% mosses =    [ 0 0 1 1 1 1 0 0 0 0 ];
-% vasculars = [ 1 1 0 0 0 0 1 1 1 1 ];
-% sedges =    [ 1 0 0 0 0 0 0 1 0 0 ];
-% woody =     [ 0 1 0 0 0 0 0 0 1 1 ];
-
-% % *** PFT Parameters                                    ***ALD NOT USED****
-% %                  WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
-% PFT_param(1,:) =  [ 0.1    0.4    0.4    0.1   2.0   2.0   0.1    1.     1.     3*1.0    0.2     0.3  ]; % minerotrophic sedge
-% PFT_param(2,:) =  [ 0.2    0.2    1.0    1.0   2.0   2.0   0.1    1.     1.     3*0.5    0.5     0.25 ]; % deciduous shrub
-% PFT_param(3,:) =  [ 0.01   0.2    0.05   2.0   1.0   19.   0.1    1.     1.     1*0.5    1.0     0.1  ]; % hollow sphagnum
-% PFT_param(4,:) =  [ 0.1    0.3    0.4    2.0   1.0   19.   0.1    1.     1.     1*0.5    1.0     0.07 ]; % lawn sphagnum
-% PFT_param(5,:) =  [ 0.2    0.1    0.5    2.0   1.0   19.   0.1    1.     1.     1*0.5    1.0     0.05 ]; % hummock sphagnum
-% PFT_param(6,:) =  [ 0.4    0.4    0.6    4.0   6.0   19.   0.1    1.     1.     1*0.25   1.0     0.1  ]; % feathermoss
-% PFT_param(7,:) = [ 0.2    0.2    0.2    4.0   2.0   19.   0.1    1.     1.     1*0.25   0.5     0.3  ];  % ombrotrophic herb
-% PFT_param(8,:) = [ 0.2    0.3    0.3    4.0   2.0   19.   0.1    1.     1.     1*0.5    0.2     0.2  ];  % ombrotrophic sedge
-% PFT_param(9,:) = [ 0.3    0.3    1.0    4.0   2.0   19.   0.1    1.     1.     1*0.5    0.5     0.2  ];  % evergreen shrub
-% PFT_param(10,:) = [ 0.8    0.3    10.0   2.0   20.   10.   0.1    1.     1.     1*2.8    0.7     0.3  ]; % tree
 
 % **************
 % VEGETATION ALL VERSIONS
@@ -243,13 +184,15 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 0.9;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
-q10_npp = 1.5;   % see Julie Talbot email of 4 June 2014
+q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 
-NPP_rel = NPP_rel * (max_npp / total_npp)   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
+NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
+NPP_rel1 = NPP_rel;
+bogNPPfac = 0.8; % scale factor for relative decrease in NPP at fen-bog transition
 
 % # years averaging WTD for vascular plant NPP (1 year for non-vascular)
 %   ?? add another lag value for trees different from other vascular?
@@ -261,7 +204,7 @@ lag_years = 5;
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
 tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
-tf_old_new_timing = 150;  % years before end of simulation to switch 
+tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
     year_old2new = sim_len - tf_old_new_timing;
@@ -277,10 +220,12 @@ if (tf_old_new > 0.5)
     k_0 = [k_0 k_0];
     k_month_0 = [k_month_0 k_month_0];
     NPP_rel = [NPP_rel NPP_rel];
+	NPP_rel1 = NPP_rel;
     mosses =    [ mosses mosses ];
     vasculars = [ vasculars vasculars ];
     sedges =    [ sedges sedges ];
     woody =     [ woody woody ];
+    roots =     [ roots roots ];
 %     tf_sedge_root = [tf_sedge_root tf_sedge_root];
 %     tf_non_sedge_root = [tf_non_sedge_root tf_non_sedge_root];
 %     tf_moss = [tf_moss tf_moss];
@@ -311,8 +256,8 @@ rootin_c5 = 0.04;    % no longer used, this was a smoothing term for the root di
 % **************
 %   BULK DENSITY
 
-min_bulk_dens = 80.;   % kg/m3
-del_bulk_dens = 40.;   % bulk density increase down profile, kg/m3
+min_bulk_dens = 60.;   % kg/m3
+del_bulk_dens = 70.;   % bulk density increase down profile, kg/m3
 dens_c1 = 0.333;  % m_star value at which bulk density rises halfway from min to max
 dens_c2 = 0.20;  % parameter controlling steepness of bulk density transition (smaller is steeper)
 OM_dens = 1300; % density of organic matter [kg/m3]
@@ -355,16 +300,18 @@ elseif (bog_fen_id < 2.5)   %  PERENNIAL FEN VALUES
 
 else   %  PERMAFROST SITE VALUES
     
-    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.4); % max runoff + max ET = mean annual precip + xx m/yr
-    Roff_c2 = 0.75;  % linear increase in runoff (m/y) per meter of total peat height
+    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.1); % max runoff + max ET = mean annual precip + xx m/yr
+    Roff_c2 = 1.75;  % linear increase in runoff (m/y) per meter of total peat height
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
-    Roff_c2a = 1.2 * start_depth;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
+    Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
 
-    anoxia_scale_length = 3;  % exponential decline in decomp in catotelm from wfps_sat_rate to wfps_min_rate
-
-    runon_c1 = 0.5;  % total peat depth (m) at which run-on declines by ~50%
+    anoxia_scale_length = 2;  % exponential decline in decomp in catotelm from wfps_sat_rate to wfps_min_rate
+    anoxia_scale_length1 = anoxia_scale_length;
+    anoxia_scale_length2 = 0.3;
+    
+    runon_c1 = depth_runOnOff;  % total peat depth (m) at which run-on declines by ~50%
     runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
-    runon_c3 = 0.05;  % magnitude of maximum run-on (m/month)
+    runon_c3 = 0.02;  % magnitude of maximum run-on (m/month)
 
 end
 % ???  ***SHOULD Roff_c1 EVER BE ZERO???***
@@ -405,13 +352,13 @@ disp(sprintf('ann_ppt (m/y): %d  ann_ET0 (m/y): %d, ann_runoff0 (m/y): %d', ann_
 
 save('hpm20_mon_param_vals','out_name', 'in_name', 'clim_in_name', 'c14_in_name', 'site_name', 'sim_name', 'monthly_T_P_name', ...
     'sim_len','sim_start','sim_end','tau_c14','max_pot_peat_ht',...
-    'gipl_flag','pf_flag','RCP_flag', 'latitude', 'dayLength', 'month_midday', ...
-    'start_depth', 'ald_0', 'wtd_0', 'lag_years', ...
-    'num_veg','mosses','vasculars','sedges','woody', 'tf_old_new','year_old2new', ...
+    'gipl_flag','pf_flag', 'thermokarst_flag', 'RCP_flag', 'latitude', 'dayLength', 'month_midday', ...
+    'start_depth','depth_MnOmTrans', 'ald_0', 'wtd_0', 'lag_years', ...
+    'num_veg','mosses','vasculars','sedges','woody', 'roots', 'tf_old_new','year_old2new', ...
     'WTD_opt','WTD_range','PD_opt','PD_range','ALD_opt','ALD_range',...
-    'NPP_rel','max_npp', 'ag_frac_npp','bg_frac_npp','q10_npp', ...
+    'NPP_rel','NPP_rel1', 'bogNPPfac','max_npp', 'ag_frac_npp','bg_frac_npp','q10_npp', ...
     'rootin_d80','rootin_alpha','rootin_min','rootin_sedge_max','rootin_c5','rootin_max',...
-    'k_0','k_month_0','wfps_opt','wfps_curve','wfps_sat_rate','wfps_min_rate','anoxia_scale_length',...
+    'k_0','k_month_0','wfps_opt','wfps_curve','wfps_sat_rate','wfps_min_rate','anoxia_scale_length','anoxia_scale_length1', 'anoxia_scale_length2',...
     'min_bulk_dens','del_bulk_dens','dens_c1','dens_c2','OM_dens',...
     'ann_temp','ann_ppt', 'ann_ET_0','del_water_threshold',...
     'ET_wtd_1','ET_wtd_2','ET_min_frac','ET_param','ET_snow_depth',...
