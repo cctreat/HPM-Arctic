@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'Ennadai';
-sim_name = '_5_optim2_2015_T-NPP';
-monthly_T_P_name =  '_monthly_T_P_5830BP_2015CE'; 
+sim_name = '_2011-11-21_2100_optim4D';
+monthly_T_P_name =  '_monthly_T_P_5810BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -30,8 +30,8 @@ in_name = strcat(dataWrite_workDirect, 'hpm20_mon_input_files/', site_name, sim_
 clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthly_T_P_name,'.csv');
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
-sim_start = 5830; % years BP (before 'present'), where 0 BP = 1950 CE
-sim_end = -64;   % years BP  (-150 BP = 2100 CE)
+sim_start = 5810; % years BP (before 'present'), where 0 BP = 1950 CE
+sim_end = -150;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
 gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) temperature effect on decomp
@@ -68,8 +68,8 @@ end
 ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-depth_runOnOff = 1.33 ;% depth when run-on switches to runoff
-depth_MnOmTrans = 1.93; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 0.75;% depth when run-on switches to runoff
+depth_MnOmTrans = 2.2; %depth of the transition from minerotrophy to ombrotrophy.
 max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 % *********************
@@ -115,9 +115,9 @@ PFT_param = zeros(num_veg,12);
  
 % *** PFT Parameters                   ** PD not used **
 %                 WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
-PFT_param(1,:) = [ 0.1   0.09    0.35   1.0   2.   19.   1.0    19.    29.     0.5      1.0     0.04  ]; % moss
-PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      1.0     0.25  ]; % sedge aboveground
-PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   0.5    1.0    29.     2.0      0.0     0.225 ]; % sedge belowground
+PFT_param(1,:) = [ 0.1   0.09    0.35   1.0   2.   19.   1.0    19.    29.     0.7      1.0     0.04  ]; % moss
+PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   2.0    1.5    29.     1.0      1.0     0.25  ]; % sedge aboveground
+PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   2.0    1.5    29.     1.0      0.0     0.225 ]; % sedge belowground
 PFT_param(4,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     1.3      1.0     0.15  ]; % shrub aboveground
 PFT_param(5,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     0.7      0.0     0.10  ]; % shrub belowground
 
@@ -184,14 +184,14 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.8;   % see spreadsheet NPP-T response camill
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
 NPP_rel1 = NPP_rel;
-bogNPPfac = 0.3851; % scale factor for relative decrease in NPP at fen-bog transition
+bogNPPfac = 0.48; % scale factor for relative decrease in NPP at fen-bog transition
 % # years averaging WTD for vascular plant NPP (1 year for non-vascular)
 %   ?? add another lag value for trees different from other vascular?
 
@@ -201,7 +201,7 @@ lag_years = 5;
 % ********************************************************
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
-tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
 tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
@@ -299,9 +299,9 @@ else   %  PERMAFROST SITE VALUES
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
     Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
 
-    anoxia_scale_length =  1.873;
+    anoxia_scale_length =  2.05;
     anoxia_scale_length1 = anoxia_scale_length;
-    anoxia_scale_length2 = 0.2043;
+    anoxia_scale_length2 = 0.21;
    
     runon_c1 = depth_runOnOff;  % total peat depth (m) at which run-on declines by ~50%
     runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
