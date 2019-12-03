@@ -553,7 +553,7 @@ for iyear = 2: sim_len
         end
         
 % trying to add some heat to the unfrozen layers
-%    heat is added by increasing node temps by 'MoHeatIn' (°C) each month
+%    heat is added by increasing node temps by 'MoHeatIn' (Â°C) each month
 %    (only to unfrozen layers within depth range of ???
 
           node_thawed = soil_node_temp_month > 0;  % =0 if frozen, =1 otherwise (for transmissivity and infiltration and AET?)   
@@ -970,7 +970,7 @@ end
     lag_ALD = mean(ann_ALD_max((iyear - 9):iyear));
     del_z = mean(diff(ann_Z_total((iyear - 9):iyear)));
      if del_z < 0 && lag_ALD > params.ald_0  && ...
-             ann_Z_total(iyear) > params.Roff_c2a f
+             ann_Z_total(iyear) > params.Roff_c2a 
          peat_loss_year = iyear - 0.1
          params.Roff_c2a = max(ann_Z_total);
          params.runon_c1 = max(ann_Z_total);
