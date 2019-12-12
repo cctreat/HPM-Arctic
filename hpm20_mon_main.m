@@ -34,13 +34,13 @@
 % hpm20_mon_params_Seida;
 % hpm20_mon_params_Ennadai_win;
 % hpm20_mon_params_Selwyn_win;
-hpm20_mon_params_JBL3_win
+% hpm20_mon_params_JBL3_win
 % hpm20_mon_params_Ennadai_mac
-% hpm20_mon_params_Ennadai_win
+%  hpm20_mon_params_Ennadai_win
 % hpm20_mon_params_Ennadai_win_PFTchanges
 % hpm20_mon_params_JoeyL_win
-% hpm20_mon_params_CCRP_win;
-% hpm20_mon_params_Kukjuk_mac;
+%  hpm20_mon_params_TKP_win;
+ hpm20_mon_params_BailieBog_win;
 params=load('hpm20_mon_param_vals');
 
 nveg = params.num_veg;
@@ -970,7 +970,7 @@ end
     lag_ALD = mean(ann_ALD_max((iyear - 9):iyear));
     del_z = mean(diff(ann_Z_total((iyear - 9):iyear)));
      if del_z < 0 && lag_ALD > params.ald_0  && ...
-             ann_Z_total(iyear) > params.Roff_c2a f
+             ann_Z_total(iyear) > params.Roff_c2a 
          peat_loss_year = iyear - 0.1
          params.Roff_c2a = max(ann_Z_total);
          params.runon_c1 = max(ann_Z_total);
