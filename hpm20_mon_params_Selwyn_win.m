@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'Selwyn';
-sim_name = '_1_optim3_control_2015_Tnpp';
+sim_name = '_2_Optim3';
 monthly_T_P_name =  '_monthly_T_P_6580BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -68,8 +68,8 @@ end
 ald_0 = 1.25;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-depth_runOnOff = 1.7 ;% depth when run-on switches to runoff
-depth_MnOmTrans = 1.8; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 1.43 ;% depth when run-on switches to runoff
+depth_MnOmTrans = 1.73; %depth of the transition from minerotrophy to ombrotrophy.
 max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 % *********************
@@ -185,14 +185,14 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
 NPP_rel1 = NPP_rel;
-bogNPPfac = 0.75; % scale factor for relative decrease in NPP at fen-bog transition
+bogNPPfac = 0.69; % scale factor for relative decrease in NPP at fen-bog transition
 % # years averaging WTD for vascular plant NPP (1 year for non-vascular)
 %   ?? add another lag value for trees different from other vascular?
 
@@ -300,9 +300,9 @@ else   %  PERMAFROST SITE VALUES
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
     Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
 
-    anoxia_scale_length = 1.2
+    anoxia_scale_length = 2.95;
     anoxia_scale_length1 = anoxia_scale_length;
-    anoxia_scale_length2 = 0.2;
+    anoxia_scale_length2 = 0.26;
    
     runon_c1 = depth_runOnOff;  % total peat depth (m) at which run-on declines by ~50%
     runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
