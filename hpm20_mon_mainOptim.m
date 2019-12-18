@@ -1,5 +1,5 @@
-function rmseErr = hpm20_mon_mainOptim(x) %start runon/runoff = x(1), ...
-% height_fbt = x(2); NPP_max = x(3); 
+function rmseErr = hpm20_mon_mainOptim(x) %% NOT start runon/runoff = x(1), ...
+% height_fbt = x(2); NPP scale and fen-bog transition = x(3); 
 % anoxia_scalelengthFen = x(4); anoxia_scalelengthBog = x(5);
 
 
@@ -43,9 +43,9 @@ function rmseErr = hpm20_mon_mainOptim(x) %start runon/runoff = x(1), ...
 % hpm20_mon_params_CCRP_win;
 % hpm20_mon_params_Kukjuk_mac;
 params=load('hpm20_mon_param_vals');
+params.anoxia_scale_length = x(3);
 params.Roff_c2a = x(1);
 params.runon_c1 = x(1);
-params.anoxia_scale_length = x(4);
 
 nveg = params.num_veg;
 sim_len_yr = params.sim_len
@@ -255,6 +255,7 @@ ann_resp_age2 = zeros(sim_len_yr ,1);   % age-mass weight of annual respiration
 start_day_of_month = [1,32,60,91,121,152,182,213,244,274,305,335];  % no leap years
 end_day_of_month =  [31,59,90,120,151,181,212,243,273,304,334,365];  % no leap years
 mid_day_of_month = round((start_day_of_month + end_day_of_month)/2);
+years_BP = params.sim_start:-1:params.sim_end;
 
 % for testing
 ann_snowsublimation_accum = 0;  % June 2018: Hamon PET method averages 60% of 10%_loss_per_month for Toolik temperatures 
@@ -918,9 +919,9 @@ end
  % induce height-related shift to ombrotrophy (low O2 penetration/anoxia
  % scale length) + decrease in NPP
  %---------------------------
- if ann_Z_total(iyear) > x(2)
-     params.anoxia_scale_length = x(5);
-     params.NPP_rel = params.NPP_rel1 * x(3);
+ if (ann_Z_total(iyear) > params.depth_MnOmTrans)
+     params.anoxia_scale_length = x(4);
+     params.NPP_rel = params.NPP_rel1 * x(2);
 %  else
 %      params.NPP_rel = params.NPP_rel1;
  end

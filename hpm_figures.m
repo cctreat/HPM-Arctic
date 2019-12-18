@@ -516,7 +516,7 @@ caxis_ticks_str = Num2CellStr(caxis_ticks);
 
 set(cb,'YTickLabel',caxis_ticks_str);
    
-ylim([0,2]) %max(depth)])
+ylim([0, max(depth)])
 % zlim([0 1])
 % colorbar
 % caxis([0 1])
@@ -720,7 +720,7 @@ yr_1800_CE = 150 - min(years_BP);
 
 % plot or not
 
-plot_flag = 1;
+plot_flag = 0;
 
 if (plot_flag > 0)
 
@@ -920,23 +920,23 @@ legend('\fontsize{10}0 cm','\fontsize{10}20 cm', '\fontsize{10}50 cm',...
     '\fontsize{10}100 cm', '\fontsize{10}300 cm')
 legend('orientation','Horizontal','Location','South')
 
-subplot(4,1,3)
-plot(soil_node_temp_month_saveMAT((sim_start+TwindowSt)*12:(sim_start+TwindowSt+10)*12,layers_of_int)); hold on
-plot(mon_snowdepth(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12))*100); 
-plot(-mon_wtd(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12))*100); 
-line((0:120), mon_temp_forcing(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12)), 'Color', 'black');hold off
-title('\fontsize{10}Monthly soil temps, 2005-2015');
-legend('\fontsize{10}0 cm','\fontsize{10}5 cm', '\fontsize{10}10 cm',  '\fontsize{10}20 cm', '\fontsize{10}50 cm',...
-    '\fontsize{10}100 cm', '\fontsize{10}300 cm', '\fontsize{10}SnowDepth_cm', '\fontsize{10}WTD', '\fontsize{10}Air Temp')
-legend('Location','East')
-subplot(4,1,4)
-plot(ann_Z_total); hold on
-plot(ann_Z_total - ann_ALD_max)
-plot(ann_Z_total - mon_wtd(jul))
-title('\fontsize{10}Peat Height, WT, ALD');
-legend('\fontsize{10}Peat height','\fontsize{10}Annual ALD', '\fontsize{10}July WTD')
-legend('orientation','Horizontal','Location','South')
-hold off
+% subplot(4,1,3)
+% plot(soil_node_temp_month_saveMAT((sim_start+TwindowSt)*12:(sim_start+TwindowSt+10)*12,layers_of_int)); hold on
+% plot(mon_snowdepth(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12))*100); 
+% plot(-mon_wtd(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12))*100); 
+% line((0:120), mon_temp_forcing(((sim_start+TwindowSt)*12):((sim_start+TwindowSt+10)*12)), 'Color', 'black');hold off
+% title('\fontsize{10}Monthly soil temps, 2005-2015');
+% legend('\fontsize{10}0 cm','\fontsize{10}5 cm', '\fontsize{10}10 cm',  '\fontsize{10}20 cm', '\fontsize{10}50 cm',...
+%     '\fontsize{10}100 cm', '\fontsize{10}300 cm', '\fontsize{10}SnowDepth_cm', '\fontsize{10}WTD', '\fontsize{10}Air Temp')
+% legend('Location','East')
+% subplot(4,1,4)
+% plot(ann_Z_total); hold on
+% plot(ann_Z_total - ann_ALD_max)
+% plot(ann_Z_total - mon_wtd(jul))
+% title('\fontsize{10}Peat Height, WT, ALD');
+% legend('\fontsize{10}Peat height','\fontsize{10}Annual ALD', '\fontsize{10}July WTD')
+% legend('orientation','Horizontal','Location','South')
+% hold off
 
 h33c = gcf;
 fig33name = [params.out_name, '_soilT_metrics'];

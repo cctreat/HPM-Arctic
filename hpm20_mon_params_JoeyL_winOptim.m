@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'JoeyL';
-sim_name = '_Optim2';
+sim_name = '_NewNPP_Optim';
 monthly_T_P_name =  '_monthly_T_P_8250BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -51,8 +51,8 @@ max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 % read in monthly climate data from climate processing file
 % hpm_climate_params20;
-ann_temp = -3.4;  % site mean annual temp (C) for parameter values
-ann_ppt = 0.585;  % site total annual precipitation (m/y) for parameter values
+ann_temp = -2.9;  % site mean annual temp (C) for parameter values
+ann_ppt = 0.509;  % site total annual precipitation (m/y) for parameter values
 ann_ET_0 = 0.7;  % site base evapotranspiration (m/y) used to compute base run-off
 
 latitude = 55.5; % degrees North > 0
@@ -74,7 +74,8 @@ end
 ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-% depth_MnOmTrans = 2.0; %depth of the transition from minerotrophy to ombrotrophy.
+depth_MnOmTrans = 1.5; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 1.3;
 
 % *********************
 %  LATERAL HEAT FLUX PARAMETERS
@@ -119,11 +120,11 @@ PFT_param = zeros(num_veg,12);
  
 % *** PFT Parameters                   ** PD not used **
 %                 WTD_0, WTD_-, WTD_+, PD_0, PD_-, PD_+, ALD_0, ALD_-, ALD_+, NPP_rel, NPP_AG, k_exp   
-PFT_param(1,:) = [ 0.1   0.09    0.20    1.0   2.   19.   1.0    19.    29.     1.0      1.0     0.04  ]; % moss
-PFT_param(2,:) = [ 0.025 0.05    0.15    1.0   2.   19.   0.5    1.0    2.0     2.0      1.0     0.25  ]; % sedge aboveground
-PFT_param(3,:) = [ 0.025 0.05    0.15    1.0   2.   19.   0.5    1.0    2.0     2.0      0.0     0.225 ]; % sedge belowground
-PFT_param(4,:) = [ 0.25   0.09    1.5     1.0   2.   19.   0.8    1.0    9.     1.3      1.0     0.15  ]; % shrub aboveground
-PFT_param(5,:) = [ 0.25   0.09    1.5     1.0   2.   19.   0.8    1.0    9.     0.7      0.0     0.10  ]; % shrub belowground
+PFT_param(1,:) = [ 0.1   0.09    0.35   1.0   2.   19.   1.0    19.    29.     0.7      1.0     0.04  ]; % moss
+PFT_param(2,:) = [ 0.025 0.15    0.20   1.0   2.   19.   2.0    1.5    29.     1.0      1.0     0.25  ]; % sedge aboveground
+PFT_param(3,:) = [ 0.025 0.15    0.20   1.0   2.   19.   2.0    1.5    29.     1.0      0.0     0.225 ]; % sedge belowground
+PFT_param(4,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     1.3      1.0     0.15  ]; % shrub aboveground
+PFT_param(5,:) = [ 0.25   0.15    3.5    1.0   2.   19.   2.0    1.5    29.     0.7      0.0     0.10  ]; % shrub belowground
 
 
 % **************
@@ -188,7 +189,7 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
@@ -304,13 +305,13 @@ else   %  PERMAFROST SITE VALUES
     Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.2); % max runoff + max ET = mean annual precip + xx m/yr
     Roff_c2 = 1.75;  % linear increase in runoff (m/y) per meter of total peat height
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
-%    Roff_c2a = 1.4;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
+    Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
 
 %     anoxia_scale_length = 3.0;
 %     anoxia_scale_length1 = anoxia_scale_length;
 %     anoxia_scale_length2 = 0.8;
    
-%    runon_c1 = 0.875;  % total peat depth (m) at which run-on declines by ~50%
+    runon_c1 = depth_runOnOff;  % total peat depth (m) at which run-on declines by ~50%
     runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
     runon_c3 = 0.02;  % magnitude of maximum run-on (m/month)
 
@@ -355,6 +356,7 @@ save('hpm20_mon_param_vals','out_name', 'in_name', 'clim_in_name', 'c14_in_name'
     'obsCore_age', 'obsCore_depths',...
     'gipl_flag','pf_flag','RCP_flag', 'latitude', 'dayLength', 'month_midday', ...
     'start_depth', 'ald_0', 'wtd_0', 'lag_years', ...
+    'depth_MnOmTrans',...
     'num_veg','mosses','vasculars','sedges','woody','roots', 'tf_old_new','year_old2new', ...
     'WTD_opt','WTD_range','PD_opt','PD_range','ALD_opt','ALD_range',...
     'NPP_rel', 'NPP_rel1', 'max_npp', 'ag_frac_npp','bg_frac_npp','q10_npp', ...
@@ -366,4 +368,4 @@ save('hpm20_mon_param_vals','out_name', 'in_name', 'clim_in_name', 'c14_in_name'
     'Roff_c1','Roff_c2','Roff_c3','Roff_c4','max_inundation','runon_c2','runon_c3',...
     'wfps_c1','wfps_c2','wfps_c3','HeatFlux_DeltaT', 'HeatFlux_StartYear','HeatFlux_EndYear');
 
-%'anoxia_scale_length','anoxia_scale_length2',  'Roff_c2a', 'runon_c1',
+%'anoxia_scale_length','anoxia_scale_length2',       'depth_MnOmTrans','Roff_c2a', 'runon_c1',...

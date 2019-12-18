@@ -1,5 +1,5 @@
 function [new_wfps, new_WTD, new_PEAT_water, wat_cont_error, new_TOT_water, WT_below_peat_counter, ...
-    new_TOT_water_est, new_TOT_water_est2] = ...
+    new_TOT_water_est, new_TOT_water_est2, WTcase] = ...
             hpm20_mon_wtd_wfps(WTD,init_TOT_water, new_water, Zstar, DENS,THICK,DEPTH,POROSITY, ...
                                  ONEVEC,ZEROVEC,params ,ALT, WT_BELOW_PEAT_counter)
 
@@ -59,6 +59,9 @@ wtd_step_fraction = 1.0;  % factor for change in WTD relative to depth of new_wa
 TOT_porosity = sum(POROSITY .* THICK);
 new_TOT_water = init_TOT_water + new_water;
 
+%debug
+WTcase = 0;
+
 %  first determine if WT is above peat surface, and set WTD and WFPS (WFPS=1)  and return
  
 if (new_TOT_water >= TOT_porosity)  % peat is saturated, WTD at or above surface (i.e., WTD <= 0)
@@ -70,6 +73,8 @@ if (new_TOT_water >= TOT_porosity)  % peat is saturated, WTD at or above surface
     WT_below_peat_counter = WT_BELOW_PEAT_counter;
     new_TOT_water_est = new_TOT_water;
     new_TOT_water_est2 = new_TOT_water;
+
+    WTcase = 1;
 
     return
 
@@ -95,6 +100,7 @@ if (new_TOT_water < min_peat_water)
     new_TOT_water_est2 = new_PEAT_water;
 
     WT_below_peat_counter = WT_BELOW_PEAT_counter + 1;
+    WTcase = 2;
     return;
 end
 
@@ -111,6 +117,7 @@ end
 if (init_TOT_water > TOT_porosity)
     new_water = new_water + (init_TOT_water - TOT_porosity);
     WTD = 0;
+    WTcase = 4;
 end
     
 % estimate new WT position, keeping it at or below peat surface, and above the peat base
@@ -164,7 +171,7 @@ if (max(DEPTH) > 1)
     junk = 1;
 end
 %  ADD any checks on WT position (e.g., is it within the peat?)
-
+WTcase = WTcase -1;
 return;
 
 % ------------

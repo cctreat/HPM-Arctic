@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'JoeyL';
-sim_name = '_5_nppPFT_2100_TK'; 
-monthly_T_P_name =  '_monthly_T_P_8250BP_2100CE'; 
+sim_name = '_4_optim2'; 
+monthly_T_P_name =  '_monthly_T_P_8250BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -31,22 +31,22 @@ clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthl
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 8250; % years BP (before 'present'), where 0 BP = 1950 CE
-sim_end = -150;   % years BP  (-150 BP = 2100 CE)
+sim_end = -64;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
 gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) temperature effect on decomp
 %   gipl_flag should always be 1??
 RCP_flag = 1; % 1 = RCP8.5, 2 = RCP6.0, 3 = RDCP4.5, 4 = RCP2.6 (used for 21st century 14C values from Heather Graven)
 pf_flag = 1; % if 1 site has or may sometimes have permafrost; otherwise 0 
-thermokarst_flag = 1; % 1 if simulating inundation associated with permafrost thaw
+thermokarst_flag = 0; % 1 if simulating inundation associated with permafrost thaw
 
 % **************
 %%  SITE CLIMATE
 
 % read in monthly climate data from climate processing file
 % hpm_climate_params20;
-ann_temp = -3.4;  % site mean annual temp (C) for parameter values
-ann_ppt = 0.585;  % site total annual precipitation (m/y) for parameter values
+ann_temp = -2.9;  % site mean annual temp (C) for parameter values
+ann_ppt = 0.509;  % site total annual precipitation (m/y) for parameter values
 ann_ET_0 = 0.7;  % site base evapotranspiration (m/y) used to compute base run-off
 
 latitude = 55.5; % degrees North > 0
@@ -69,8 +69,8 @@ end
 ald_0 = 1.25;  % first year active layer depth, if needed (m) &  threshold for thermokarstID
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-depth_MnOmTrans = 2.0; %depth of the transition from minerotrophy to ombrotrophy.
-depth_runOnOff = 0.4;
+depth_MnOmTrans = 1.5; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 0.31;
 max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 
@@ -186,14 +186,14 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
 NPP_rel1 = NPP_rel;
-bogNPPfac = 1; % scale factor for relative decrease in NPP at fen-bog transition
+bogNPPfac = 0.65; % scale factor for relative decrease in NPP at fen-bog transition
 % # years averaging WTD for vascular plant NPP (1 year for non-vascular)
 %   ?? add another lag value for trees different from other vascular?
 
@@ -203,7 +203,7 @@ lag_years = 5;
 % ********************************************************
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
-tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
 tf_old_new_timing = 85;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
@@ -301,9 +301,9 @@ else   %  PERMAFROST SITE VALUES
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
     Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
 
-    anoxia_scale_length = 1.0; % 1.1048;
+    anoxia_scale_length = 1.11; % 1.1048;
     anoxia_scale_length1 = anoxia_scale_length;
-    anoxia_scale_length2 = 2.0;% 0.8078;
+    anoxia_scale_length2 = 0.28;% 0.8078;
    
     runon_c1 = depth_runOnOff;  % total peat depth (m) at which run-on declines by ~50%
     runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
