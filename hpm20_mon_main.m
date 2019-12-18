@@ -553,7 +553,7 @@ for iyear = 2: sim_len
         end
         
 % trying to add some heat to the unfrozen layers
-%    heat is added by increasing node temps by 'MoHeatIn' (°C) each month
+%    heat is added by increasing node temps by 'MoHeatIn' (Â°C) each month
 %    (only to unfrozen layers within depth range of ???
 
           node_thawed = soil_node_temp_month > 0;  % =0 if frozen, =1 otherwise (for transmissivity and infiltration and AET?)   
