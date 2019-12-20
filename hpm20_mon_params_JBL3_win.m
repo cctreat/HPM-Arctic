@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'JBL3';
-sim_name = '_2_Optim4'; 
-monthly_T_P_name =  '_monthly_T_P_7760BP_2015CE'; 
+sim_name = '_3B'; 
+monthly_T_P_name =  '_monthly_T_P_7760BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -31,7 +31,7 @@ clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthl
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 7760; % years BP (before 'present'), where 0 BP = 1950 CE
-sim_end = -64;   % years BP  (-150 BP = 2100 CE)
+sim_end = -150;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
 gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) temperature effect on decomp
@@ -202,7 +202,7 @@ lag_years = 5;
 % ********************************************************
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
-tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
 tf_old_new_timing = 85;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
@@ -302,7 +302,7 @@ else   %  PERMAFROST SITE VALUES
 
     anoxia_scale_length = 1.1;
     anoxia_scale_length1 = anoxia_scale_length;
-    anoxia_scale_length2 = 0.81;
+    anoxia_scale_length2 = 0.76;
    
     runon_c1 = depth_runOnOff;  % total peat depth (m) at which run-on declines by ~50%
     runon_c2 = 0.5;  % controls rate of decline of run-on as function of peat height (see 'HPM vegetation productivity.xls')
