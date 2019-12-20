@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'BailieB';
-sim_name = '_0D';
+sim_name = '_0G6';
 monthly_T_P_name =  '_monthly_T_P_7750BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -68,8 +68,8 @@ end
 ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-depth_runOnOff = 1.8;% depth when run-on switches to runoff
-depth_MnOmTrans = 2.5; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 2.2;% depth when run-on switches to runoff
+depth_MnOmTrans = 2.6; %depth of the transition from minerotrophy to ombrotrophy.
 max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 % *********************

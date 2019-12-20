@@ -53,7 +53,7 @@ max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 % hpm_climate_params20;
 ann_temp = -2.9;  % site mean annual temp (C) for parameter values
 ann_ppt = 0.509;  % site total annual precipitation (m/y) for parameter values
-ann_ET_0 = 0.7;  % site base evapotranspiration (m/y) used to compute base run-off
+ann_ET_0 = -0.5;  % site base evapotranspiration (m/y) used to compute base run-off
 
 latitude = 55.5; % degrees North > 0
 
@@ -75,7 +75,7 @@ ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
 depth_MnOmTrans = 1.5; %depth of the transition from minerotrophy to ombrotrophy.
-depth_runOnOff = 1.3;
+depth_runOnOff = 0.3;
 
 % *********************
 %  LATERAL HEAT FLUX PARAMETERS
@@ -365,7 +365,8 @@ save('hpm20_mon_param_vals','out_name', 'in_name', 'clim_in_name', 'c14_in_name'
     'min_bulk_dens','del_bulk_dens','dens_c1','dens_c2','OM_dens',...
     'ann_temp','ann_ppt', 'ann_ET_0','del_water_threshold',...
     'ET_wtd_1','ET_wtd_2','ET_min_frac','ET_param','ET_snow_depth',...
+    'Roff_c2a', 'runon_c1',...
     'Roff_c1','Roff_c2','Roff_c3','Roff_c4','max_inundation','runon_c2','runon_c3',...
     'wfps_c1','wfps_c2','wfps_c3','HeatFlux_DeltaT', 'HeatFlux_StartYear','HeatFlux_EndYear');
 
-%'anoxia_scale_length','anoxia_scale_length2',       'depth_MnOmTrans','Roff_c2a', 'runon_c1',...
+%'anoxia_scale_length','anoxia_scale_length2',       'depth_MnOmTrans',

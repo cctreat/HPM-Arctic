@@ -43,9 +43,9 @@ function rmseErr = hpm20_mon_mainOptim(x) %% NOT start runon/runoff = x(1), ...
 % hpm20_mon_params_CCRP_win;
 % hpm20_mon_params_Kukjuk_mac;
 params=load('hpm20_mon_param_vals');
-params.anoxia_scale_length = x(3);
-params.Roff_c2a = x(1);
-params.runon_c1 = x(1);
+params.anoxia_scale_length = x(2);
+% params.Roff_c2a = x(1);
+% params.runon_c1 = x(1);
 
 nveg = params.num_veg;
 sim_len_yr = params.sim_len
@@ -920,8 +920,8 @@ end
  % scale length) + decrease in NPP
  %---------------------------
  if (ann_Z_total(iyear) > params.depth_MnOmTrans)
-     params.anoxia_scale_length = x(4);
-     params.NPP_rel = params.NPP_rel1 * x(2);
+     params.anoxia_scale_length = x(3);
+     params.NPP_rel = params.NPP_rel1 * x(1);
 %  else
 %      params.NPP_rel = params.NPP_rel1;
  end
