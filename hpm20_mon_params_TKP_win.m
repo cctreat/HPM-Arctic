@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'TKP';
-sim_name = '_1I2_FigXA';
-monthly_T_P_name =  '_monthly_T_P_6620BP_2015CE'; 
+sim_name = '_2C_2100';
+monthly_T_P_name =  '_monthly_T_P_6620BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -31,7 +31,7 @@ clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthl
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 6620; % years BP (before 'present'), where 0 BP = 1950 CE
-sim_end = -64;   % years BP  (-150 BP = 2100 CE)
+sim_end = -150;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
 gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) temperature effect on decomp
@@ -68,7 +68,7 @@ end
 ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-depth_runOnOff = 0.5;% depth when run-on switches to runoff
+depth_runOnOff = 4.5;% depth when run-on switches to runoff
 depth_MnOmTrans = 2.1; %depth of the transition from minerotrophy to ombrotrophy.
 max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
@@ -184,7 +184,7 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 1.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.8;   % see spreadsheet NPP-T response camill
@@ -201,7 +201,7 @@ lag_years = 5;
 % ********************************************************
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
-tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
 tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
@@ -294,7 +294,7 @@ elseif (bog_fen_id < 2.5)   %  PERENNIAL FEN VALUES
 
 else   %  PERMAFROST SITE VALUES
     
-    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.3); % max runoff + max ET = mean annual precip + xx m/yr
+    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.05); % max runoff + max ET = mean annual precip + xx m/yr
     Roff_c2 = 1.75;  % linear increase in runoff (m/y) per meter of total peat height
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
     Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
