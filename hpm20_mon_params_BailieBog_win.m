@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'BailieB';
-sim_name = '_0G6';
+sim_name = '_2C';
 monthly_T_P_name =  '_monthly_T_P_7750BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -68,8 +68,8 @@ end
 ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-depth_runOnOff = 2.2;% depth when run-on switches to runoff
-depth_MnOmTrans = 2.6; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 1.8;% depth when run-on switches to runoff
+depth_MnOmTrans = 2.5; %depth of the transition from minerotrophy to ombrotrophy.
 max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 
 % *********************
@@ -184,7 +184,7 @@ end
 
 % Specify site absolute maximum NPP (kg/m2/y dry matter) during peatland lifetime
 
-max_npp = 1.5;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
+max_npp = 1.1;   % approximate absolute maximum total NPP for all vegetation at mean annual T = 10°C, kg/m2/y
                          %  for TOOLIK (ann_temp = -10°C) Q10 multiplier is 1.5^(-2) = 0.44
 % original value was 1
 q10_npp = 1.8;   % see spreadsheet NPP-T response camill
@@ -294,7 +294,7 @@ elseif (bog_fen_id < 2.5)   %  PERENNIAL FEN VALUES
 
 else   %  PERMAFROST SITE VALUES
     
-    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.3); % max runoff + max ET = mean annual precip + xx m/yr
+    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.1); % max runoff + max ET = mean annual precip + xx m/yr
     Roff_c2 = 1.75;  % linear increase in runoff (m/y) per meter of total peat height
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
     Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))

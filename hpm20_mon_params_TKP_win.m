@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'TKP';
-sim_name = '_2C_2100';
+sim_name = '_2C_wet_2100';
 monthly_T_P_name =  '_monthly_T_P_6620BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
