@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'Ennadai';
-sim_name = '_2011-11-21_2100_optim4D';
+sim_name = '_5_2015';
 monthly_T_P_name =  '_monthly_T_P_5810BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -201,7 +201,7 @@ lag_years = 5;
 % ********************************************************
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
-tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
 tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
