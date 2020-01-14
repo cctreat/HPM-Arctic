@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'Ennadai';
-sim_name = '_5_2015';
+sim_name = '_7_2100_TK';
 monthly_T_P_name =  '_monthly_T_P_5810BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -38,7 +38,7 @@ gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) 
 %   gipl_flag should always be 1??
 RCP_flag = 1; % 1 = RCP8.5, 2 = RCP6.0, 3 = RDCP4.5, 4 = RCP2.6 (used for 21st century 14C values from Heather Graven)
 pf_flag = 1; % if 1 site has or may sometimes have permafrost; otherwise 0 
-thermokarst_flag = 0; % 1 if simulating inundation associated with permafrost thaw
+thermokarst_flag = 1; % 1 if simulating inundation associated with permafrost thaw
 
 % **************
 %  SITE CLIMATE
@@ -201,7 +201,7 @@ lag_years = 5;
 % ********************************************************
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
-tf_old_new = 0; % 1: double PFTs for old/new; otherwise = 0 & do not do this
+tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
 tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
