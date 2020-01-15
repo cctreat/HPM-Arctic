@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'JoeyL';
-sim_name = '_NewNPP_Optim';
-monthly_T_P_name =  '_monthly_T_P_8250BP_2015CE'; 
+sim_name = '_Optim2020';
+monthly_T_P_name =  '_monthly_T_P_8000BP_2015CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -30,7 +30,7 @@ in_name = strcat(dataWrite_workDirect, 'hpm20_mon_input_files/', site_name, sim_
 clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthly_T_P_name,'.csv');
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
-sim_start = 8250; % years BP (before 'present'), where 0 BP = 1950 CE
+sim_start = 8000; % years BP (before 'present'), where 0 BP = 1950 CE
 sim_end = -64;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
@@ -53,7 +53,7 @@ max_pot_peat_ht = 6; % max. height for binning 'fancy' graphs
 % hpm_climate_params20;
 ann_temp = -2.9;  % site mean annual temp (C) for parameter values
 ann_ppt = 0.509;  % site total annual precipitation (m/y) for parameter values
-ann_ET_0 = -0.5;  % site base evapotranspiration (m/y) used to compute base run-off
+ann_ET_0 = 0.6;  % site base evapotranspiration (m/y) used to compute base run-off
 
 latitude = 55.5; % degrees North > 0
 
@@ -74,8 +74,8 @@ end
 ald_0 = 1.0;  % first year active layer depth, if needed (m)
 wtd_0 = 0.02; % initialization period water table depth (m)
 start_depth = 0.25; % depth of initial peat accumulation (m) at which water balance calculations begin
-depth_MnOmTrans = 1.5; %depth of the transition from minerotrophy to ombrotrophy.
-depth_runOnOff = 0.3;
+depth_MnOmTrans = 2.2; %depth of the transition from minerotrophy to ombrotrophy.
+depth_runOnOff = 0.75;
 
 % *********************
 %  LATERAL HEAT FLUX PARAMETERS
