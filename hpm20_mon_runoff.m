@@ -80,7 +80,7 @@ transmis = transmis * (sum(layer_frozen(1:3)) < 3);  % no runoff is surface peat
 %      modify for monthly?
 %  ?  Roff_c4: threshold WTD (negative, so inundation) for immediate spillover (= Roff_c4 ? WTD); now used in main code.
 
-months_with_runoff = 8;
+months_with_runoff = 12;
 
 runoff1 = params.Roff_c1/months_with_runoff * (1 + params.Roff_c2 * (sum(THICK) - params.Roff_c2a));  % modified run-off (March 2010)
 Roff = transmis * runoff1;
