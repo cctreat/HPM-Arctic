@@ -966,7 +966,7 @@ end
  % Thermokarst scenario
  % add runoff if active layer & peat height start to decrease
  % only look if water balance calculations have started
- if (flag1 > 0.5 && thermokarst_flag > 0.5)
+ if (flag1 > 0.5 && thermokarst_flag > 0.5 && years_BP(iyear)< 100)
     lag_ALD = mean(ann_ALD_max((iyear - 9):iyear));
     del_z = mean(diff(ann_Z_total((iyear - 9):iyear)));
      if del_z < 0 && lag_ALD > params.ald_0  && ...
