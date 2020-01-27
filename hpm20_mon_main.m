@@ -33,12 +33,12 @@
 % hpm20_mon_params_Lakkasuo;
 % hpm20_mon_params_Seida;
 % hpm20_mon_params_Ennadai_win;
-hpm20_mon_params_Selwyn_win;
+% hpm20_mon_params_Selwyn_win;
 % hpm20_mon_params_JBL3_win
 % hpm20_mon_params_Ennadai_mac
 %  hpm20_mon_params_Ennadai_win
 % hpm20_mon_params_Ennadai_win_PFTchanges
-% hpm20_mon_params_JoeyL_win
+hpm20_mon_params_JoeyL_win
 % hpm20_mon_params_TKP_win;
 %  hpm20_mon_params_BailieBog_win;
 params=load('hpm20_mon_param_vals');

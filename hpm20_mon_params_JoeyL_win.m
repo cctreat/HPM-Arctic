@@ -20,7 +20,7 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'JoeyL';
-sim_name = '_5C_Optim1A_2100_TK'; 
+sim_name = '_5C_Optim1A_2100'; 
 monthly_T_P_name =  '_monthly_T_P_8000BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
@@ -38,7 +38,7 @@ gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) 
 %   gipl_flag should always be 1??
 RCP_flag = 1; % 1 = RCP8.5, 2 = RCP6.0, 3 = RDCP4.5, 4 = RCP2.6 (used for 21st century 14C values from Heather Graven)
 pf_flag = 1; % if 1 site has or may sometimes have permafrost; otherwise 0 
-thermokarst_flag = 1; % 1 if simulating inundation associated with permafrost thaw
+thermokarst_flag = 0; % 1 if simulating inundation associated with permafrost thaw
 
 % **************
 %%  SITE CLIMATE
@@ -193,7 +193,7 @@ q10_npp = 1.8;   % see Julie Talbot email of 4 June 2014
 max_npp = max_npp * q10_npp^((ann_temp - 10)/10);
 NPP_rel = NPP_rel * (max_npp / total_npp);   % scale relative NPP of all PFTs so that max sum NPP ~ 'max_npp'
 NPP_rel1 = NPP_rel;
-bogNPPfac = 0.555; % scale factor for relative decrease in NPP at fen-bog transition
+bogNPPfac = 0.55; % scale factor for relative decrease in NPP at fen-bog transition
 % # years averaging WTD for vascular plant NPP (1 year for non-vascular)
 %   ?? add another lag value for trees different from other vascular?
 
@@ -296,7 +296,7 @@ elseif (bog_fen_id < 2.5)   %  PERENNIAL FEN VALUES
 
 else   %  PERMAFROST SITE VALUES
     
-    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.2); % max runoff + max ET = mean annual precip + xx m/yr. Annual value.
+    Roff_c1 = max(0,ann_ppt - ann_ET_0 + 0.2); % max runoff + overflow + max ET = mean annual precip + xx m/yr. Annual value.
     Roff_c2 = 1.75;  % linear increase in runoff (m/y) per meter of total peat height
 %     Roff_c2a = 1.;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
     Roff_c2a = depth_runOnOff;  % peat height needed to get base run-off (factor = 1 +c2*(H-c2a))
