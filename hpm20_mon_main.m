@@ -33,12 +33,12 @@
 % hpm20_mon_params_Lakkasuo;
 % hpm20_mon_params_Seida;
 % hpm20_mon_params_Ennadai_win;
-% hpm20_mon_params_Selwyn_win;
+hpm20_mon_params_Selwyn_win;
 % hpm20_mon_params_JBL3_win
 % hpm20_mon_params_Ennadai_mac
 %  hpm20_mon_params_Ennadai_win
 % hpm20_mon_params_Ennadai_win_PFTchanges
-hpm20_mon_params_JoeyL_win
+% hpm20_mon_params_JoeyL_win
 % hpm20_mon_params_TKP_win;
 %  hpm20_mon_params_BailieBog_win;
 params=load('hpm20_mon_param_vals');
@@ -684,21 +684,6 @@ for iyear = 2: sim_len
                 ann_peat_water(iyear) = ann_peat_water(iyear) + new_PEAT_water/12;
                 ann_total_water(iyear) = ann_total_water(iyear) + TOT_water/12;
 
-                % DEBUG TEST                
-%                 if (TOT_water < TOT_porosity && new_WTD < 0)
-%                     junk = 1;
-%                 end
-
-% DEBUG TEST
-             if (mon_del_water(sim_month) < 0)
-                 junk = 1;
-             end
-            
-
-% DEBUG TEST                
-%                 if (mon_wtd(sim_month) > 50)
-%                     junk = 1;
-%                 end
                 
             else  % very small net monthly water balance term -- skip computations
                 mon_wtd(sim_month) = mon_wtd(sim_month-1);
