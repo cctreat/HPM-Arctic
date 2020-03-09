@@ -33,8 +33,8 @@
 % hpm20_mon_params_Lakkasuo;
 % hpm20_mon_params_Seida;
 % hpm20_mon_params_Ennadai_win;
-hpm20_mon_params_Selwyn_win;
-% hpm20_mon_params_JBL3_win
+% hpm20_mon_params_Selwyn_win;
+ hpm20_mon_params_JBL3_win
 % hpm20_mon_params_Ennadai_mac
 %  hpm20_mon_params_Ennadai_win
 % hpm20_mon_params_Ennadai_win_PFTchanges
@@ -158,6 +158,10 @@ age_depth0 = -9999 * ones(sim_len_yr ,30);
 age_depth2 = -9999 * ones(sim_len_yr ,375);
 growing_season_wtd = zeros(sim_len_yr,1);
 num_growing_season_months = zeros(sim_len_yr,1);
+ann_satDry_less25 = zeros(sim_len_yr, 12*10);   % number months per year layer WFPS <=25%
+ann_satOptim_2580 = zeros(sim_len_yr, 12*10);   % number months per year layer WFPS >25% & <= 85%
+ann_satWet_8099 = zeros(sim_len_yr, 12*10);   % number months per year layer WFPS >85% & <= 99%
+ann_satSat_100 = zeros(sim_len_yr, 12*10);   % number months per year layer WFPS == 100$
 
 % MONTHLY VECTORS BY TIME
 
@@ -691,6 +695,19 @@ for iyear = 2: sim_len
                 junk11(junk11_counter,:) = [iyear imonth];
 
             end
+
+            % Track number of months the monthly WFPS in each layer is above thresholds of 25%, 80%, and saturated (100%).
+             if(iyear > (sim_len_yr-10)) 
+                    ind1 = find(wfps <= 0.25);
+                    ann_satDry_less25(ind1, imonth + (sim_len_yr - iyear -9)*-12) =  1; 
+                    ind2 = find(0.25< wfps <= 0.8); %  %  month has layer WFPS >25% & <= 80%
+                    ann_satOptim_2580(ind2, imonth + (sim_len_yr - iyear -9)*-12) = 1;
+                    ind3 = find(0.8 < wfps < 1); % number months per year layer WFPS > 80% but not fully
+                   % satured
+                    ann_satWet_8099(ind3, imonth + (sim_len_yr - iyear -9)*-12) = 1;
+                    ind4 = find(wfps == 1); % fully saturated
+                     ann_satSat_100(ind4, imonth + (sim_len_yr - iyear -9)*-12) = 1;
+             end
 
 % after computing new WTD, if it causes inundation > threshold, lose that excess water as runoff
 
@@ -1367,6 +1384,17 @@ if (params.tf_old_new > 0.5)
     status = fclose(fid16);
 
 end
+
+
+% export final 10 years of monthly wfps 
+    fname3 = [params.out_name, '_wfpsU025_final10y.txt'];
+    writematrix(ann_satDry_less25, fname3);
+    fname3 = [params.out_name, '_wfps2580_final10y.txt'];
+    writematrix(ann_satOptim_2580, fname3);
+    fname3 = [params.out_name, '_wfps8099_final10y.txt'];
+    writematrix(ann_satWet_8099, fname3);
+    fname3 = [params.out_name, '_wfps100_final10y.txt'];
+    writematrix(ann_satSat_100, fname3);
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % END
