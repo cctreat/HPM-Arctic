@@ -20,8 +20,8 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'BailieB';
-sim_name = '_2J7_2300';
-monthly_T_P_name =  '_monthly_T_P_7750BP_2300CE'; 
+sim_name = '_2J7_2100';
+monthly_T_P_name =  '_monthly_T_P_7750BP_2100CE'; 
 working_directory = pwd;
 dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
 
@@ -31,7 +31,7 @@ clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthl
 c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 7750; % years BP (before 'present'), where 0 BP = 1950 CE
-sim_end = -350;   % years BP  (-150 BP = 2100 CE)
+sim_end = -150;   % years BP  (-150 BP = 2100 CE)
 sim_len = sim_start - sim_end + 1;  % simulation length (years)
 
 gipl_flag = 1; % if 0 (or 1) skip (or run) GIPL soil physics model: no (or yes) temperature effect on decomp
@@ -202,7 +202,7 @@ lag_years = 5;
 % RUN WITH DOUBLE PFTS FOR OLD-NEW CARBON ANALYSIS
 
 tf_old_new = 1; % 1: double PFTs for old/new; otherwise = 0 & do not do this
-tf_old_new_timing = 284;  % years before end of simulation to switch 
+tf_old_new_timing = 84;  % years before end of simulation to switch 
 
 if (tf_old_new > 0.5)
     year_old2new = sim_len - tf_old_new_timing;
