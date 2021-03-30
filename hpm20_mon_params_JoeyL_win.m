@@ -23,12 +23,12 @@ site_name = 'JoeyL';
 sim_name = '_FINAL_2015'; 
 monthly_T_P_name =  '_monthly_T_P_8000BP_2015CE'; 
 working_directory = pwd;
-dataWrite_workDirect = '../Analysis/';
+dataWrite_workDirect = '';
 
 out_name = strcat(dataWrite_workDirect, 'hpm20_mon_output_files/', site_name, sim_name);
 in_name = strcat(dataWrite_workDirect, 'hpm20_mon_input_files/', site_name, sim_name);
-clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthly_T_P_name,'.csv');
-c14_in_name = strcat('../hpm20_mon_input_files/', 'annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
+clim_in_name = strcat(dataWrite_workDirect, 'Climate_Drivers/',site_name, monthly_T_P_name,'.csv');
+c14_in_name = strcat('annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 8000; % years BP (before 'present'), where 0 BP = 1950 CE
 sim_end = -64;   % years BP  (-150 BP = 2100 CE)

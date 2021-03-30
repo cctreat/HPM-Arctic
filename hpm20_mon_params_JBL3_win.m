@@ -20,15 +20,15 @@
 %   have site and climate names used in climate file name.
 
 site_name = 'JBL3';
-sim_name = '_3A_2100'; 
+sim_name = '_FINAL_2100'; 
 monthly_T_P_name =  '_monthly_T_P_7760BP_2100CE'; 
 working_directory = pwd;
-dataWrite_workDirect = '../../../Dropbox/Research/UNH Arctic HPM/Permafrost Gradient/Analysis/';
+dataWrite_workDirect = '';
 
 out_name = strcat(dataWrite_workDirect, 'hpm20_mon_output_files/', site_name, sim_name);
 in_name = strcat(dataWrite_workDirect, 'hpm20_mon_input_files/', site_name, sim_name);
-clim_in_name = strcat(dataWrite_workDirect, 'climate_drivers/',site_name, monthly_T_P_name,'.csv');
-c14_in_name = strcat('../../../Dropbox/HPM30_monthly_time_step/hpm20_mon_input_files/','annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
+clim_in_name = strcat(dataWrite_workDirect, 'Climate_Drivers/',site_name, monthly_T_P_name,'.csv');
+c14_in_name = strcat('annual_atm_del_14C_20000BP_to_2500AD_all_RCP','.csv');
 
 sim_start = 7760; % years BP (before 'present'), where 0 BP = 1950 CE
 sim_end = -150;   % years BP  (-150 BP = 2100 CE)
