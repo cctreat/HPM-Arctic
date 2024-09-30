@@ -126,15 +126,15 @@ if (plot_flag > 0)
     figure(21)
     
     for nveg = 1:1:num_veg
-        subplot(4,4,nveg)
+        subplot(2,3,nveg)
         contourf(X, Y, squeeze(NPP(nveg,:,:)),100,'LineStyle','none')
-        xlim([-0.25 1])
+        xlim([-0.1 0.6])
 
 %         str = sprintf('PFT #', nveg);
 %         title(str, 'FontSize',14)   
         title(['\fontsize{14}PFT #',num2str(nveg)]);
 
-        ylim([0 8])
+        ylim([0 5])
        zlim([0 1])
         colorbar
         caxis([0 2])
@@ -145,11 +145,11 @@ if (plot_flag > 0)
         set(h1a,'FontSize',14)
     end
     
-    subplot(4,4,nveg+1)
+    subplot(2,3,nveg+1)
     contourf(X, Y, NPPtotal,100,'LineStyle','none')
-    xlim([-0.25 1])
+    xlim([-0.1 0.6])
     title('\fontsize{14}all PFT total');
-    ylim([0 8])
+    ylim([0 5])
     zlim([0 1])
     colorbar
     caxis([0 2])

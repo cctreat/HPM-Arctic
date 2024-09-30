@@ -116,8 +116,8 @@ for (j=1:1:params_gipl.ndepth)   % LOOP THROUGH SOIL LAYERS DETERMINING IF THEY 
 
     if (hpm_depth_index(j) > 0)  % peat
         
-        Cond_Th(j) = 0.04 + 0.51 * mean_wfps(j);   % from O'Donnell et al. 2009, via Wisser et al. 2011, converted from % to fraction
-        Cond_Fr(j) = 0.0141 + 0.55 * mean_wfps(j);
+        Cond_Th(j) = 0.041 + 0.51 * fwat(j); %* mean_wfps(j);   % from O'Donnell et al. 2009, via Wisser et al. 2011
+        Cond_Fr(j) = 0.0141 + 0.55 * fwat(j); % mean_wfps(j);
         Cvol_Th(j) = fpeat(j) * params_gipl.Cpeat + fwat(j) * params_gipl.Cwat;
         Cvol_Fr(j) = fpeat(j) * params_gipl.Cpeat + fwat(j) * params_gipl.Cice;  % UNFROZEN WATER CONTENT IN PEAT IS LOW (Wisser et al. 2011)
         Cvol_Sl(j) = 0.5 * (Cvol_Th(j) + Cvol_Fr(j)) + params_gipl.apparent_heat_cap * fwat(j);  % during phase change
@@ -161,9 +161,6 @@ for j = params_gipl.ndepth+1:1:params_gipl.NumberOfSoilComputationNodes
     end
 end
 
-% if (iyear == 3550)   % for debugging?
-%     pause;
-% end
 
 % implement GIPL2 model
 
