@@ -52,8 +52,6 @@ D_init = [0	0.5	1    2	3	  4	5	  10	15	  20	40	  60	80	100]; %soilNodeDepth (tem
 % T_init = [0 3 5 6 6 6 6 6 6 6 6 6 6 6];  % MER BLEUE node temperatures
 T_init = [-3 0 1 4 4 4 4 4 4 4 4 4 4 4];  % LAKKASUO node temperatures
 
-Dn_init = length(D_init);   % WHAT IS THIS FOR??
-
 % interpolate to GIPL2 grid (soilNodeDepth)
 T_init_gipl = interp1(D_init,T_init,soilNodeDepth,'pchip');
 

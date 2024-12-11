@@ -49,8 +49,6 @@ T_init = [-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1];  % Seida node temperatures
 T_init = [-10 -5 -2 -1 -0.75 -0.5 -0.25 0 0 0 0 0 0 0];  % SEIDA node temperatures
 T_init = [-5 -3 -1 -0.5 -0.5 -0.25 0 0 0 0 0 0 0 0];  % STORDALEN node temperatures
 
-%Dn_init = length(D_init);   % WHAT IS THIS FOR??
-
 % interpolate to GIPL2 grid (soilNodeDepth)
 T_init_gipl = interp1(D_init,T_init,soilNodeDepth,'pchip');
 
